@@ -1,5 +1,40 @@
 #include "ISA.h"
 #include <cmath>
+
+#define ENERGY_REG  0b0000
+#define LOGO_REG    0b0001
+#define GUESS_REG   0b0010
+#define A_REG       0b0011
+#define B_REG       0b0100
+#define C_REG	    0b0101
+#define D_REG	    0b0110
+#define IPLOC_REG   0b0111
+#define ENERGY_IREG 0b1000
+#define LOGO_IREG   0b1001
+#define GUESS_IREG  0b1010
+#define A_IREG      0b1011
+#define B_IREG      0b1100
+#define C_IREG	    0b1101
+#define D_IREG	    0b1110
+#define IPLOC_IREG  0b1111
+
+#define INC_ROP 0b000 //Increase the value in R1 by 1
+#define DEC_ROP 0b001 //Decrease the value in R1 by 1
+#define SLL_ROP 0b010 //Shift R1 Left (Logical)
+#define SRL_ROP 0b011 //Shift R1 Right (Logical)
+#define MOV_ROP 0b100 //Move R2 to R1
+#define SLT_ROP 0b101 //Set R1 to 0xFF if R1 < R2, else R1 = 0
+#define SGT_ROP 0b110 //Set R1 to 0xFF if R1 > R2, else R1 = 0
+#define SET_ROP 0b111 //Set R1 to 0xFF if R1 = R2, else R1 = 0
+
+#define DIV_COP 0b000 //Reproduce at iploc
+#define JMP_COP 0b001 //Jump to template
+#define JPC_COP 0b010 //Jump to template if R2 = 0xFF
+#define MOV_COP 0b011 //Move organism to iploc
+#define IGN_COP 0b100 //(Literally does nothing)
+#define NPA_COP 0b101 //NOP A, part of the template system.
+#define NPB_COP 0b110 //NOP B, part of the template system.
+#define ATK_COP 0b111 //Attack organism at iploc
 using namespace std;
 int iploc_x(int x, int y, int iploc)
 {
@@ -139,7 +174,7 @@ int find(int x, int y, CellState*** world_state, int initial_ip)
 	while (current_ip != initial_ip)
 	{
 		int current_op = get_OP(current_cell->genes[current_ip]);
-		if (current_op == 5 || current_op == 6)
+		if (current_op == NPA_COP || current_op == NPB_COP)
 		{
 			//NOP
 			if (in_initial_template)
@@ -215,43 +250,44 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 	int target_x = iploc_x(x, y, current->iploc)%world_size;
 	int target_y = iploc_y(x, y, current->iploc)%world_size;
 
-	if (R1 == 0 || (R1 >= 8 && R1 <= 15))
+	if (R1 == ENERGY_REG || (R1 > IPLOC_REG))
 	{
-		if (op == 0)
+		//Cell Operations
+		if (op == DIV_COP)
 		{
 			reproduce(x, y, target_x, target_y, world_state);
 		}
-		else if (op == 1)
+		else if (op == JMP_COP)
 		{
 			current->ip = find(x, y, world_state, current->ip);
 		}
-		else if (op == 2)
+		else if (op == JPC_COP)
 		{
 			if (R2_value == 0xFF)
 			{
 				current->ip = find(x, y, world_state, current->ip);
 			}
 		}
-		else if (op == 3)
+		else if (op == MOV_COP)
 		{
 			//Move
 			CellState* temp = world_state[x][y];
 			world_state[x][y] = world_state[target_x][target_y];
 			world_state[target_x][target_y] = temp;
 		}
-		else if (op == 4)
+		else if (op == IGN_COP)
 		{
 			//Literally do nothing
 		}
-		else if (op == 5)
+		else if (op == NPA_COP)
 		{
 			//Nop A
 		}
-		else if (op == 6)
+		else if (op == NPB_COP)
 		{
 			//Nop B
 		}
-		else if (op == 7)
+		else if (op == ATK_COP)
 		{
 			attack(x, y, target_x, target_y, world_state);
 		}
@@ -259,27 +295,27 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 	else
 	{
 		int new_R1 = 0;
-		if (op == 0)
+		if (op == INC_ROP)
 		{
 			new_R1 = R1_value + 1;
 		}
-		else if (op == 1)
+		else if (op == DEC_ROP)
 		{
 			new_R1 = R1_value - 1;
 		}
-		else if (op == 2)
+		else if (op == SLL_ROP)
 		{
 			new_R1 = R1_value << 1;
 		}
-		else if (op == 3)
+		else if (op == SRL_ROP)
 		{
 			new_R1 = R1_value >> 1;
 		}
-		else if (op == 4)
+		else if (op == MOV_ROP)
 		{
 			new_R1 = R2_value;
 		}
-		else if (op == 5)
+		else if (op == SLT_ROP)
 		{
 			if (R1_value < R2_value)
 			{
@@ -290,7 +326,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 				new_R1 = 0x00;
 			}
 		}
-		else if (op == 6)
+		else if (op == SGT_ROP)
 		{
 			if (R1_value > R2_value)
 			{
@@ -301,7 +337,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 				new_R1 = 0x00;
 			}
 		}
-		else if (op == 7)
+		else if (op == SET_ROP)
 		{
 			if (R1_value == R2_value)
 			{
@@ -322,35 +358,35 @@ void set(int x, int y, int reg, int new_value, CellState*** world_state, int wor
 	{
 		throw "Cannot Set Energy Directly!";
 	}
-	else if (reg == 1)
+	else if (reg = LOGO_REG)
 	{
 		current->logo = new_value;
 	}
-	else if (reg == 2)
+	else if (reg = GUESS_REG)
 	{
 		current->guess = new_value;
 	}
-	else if (reg == 3)
+	else if (reg == A_REG)
 	{
 		current->reg_a = new_value;
 	}
-	else if (reg == 4)
+	else if (reg == B_REG)
 	{
 		current->reg_b = new_value;
 	}
-	else if (reg == 5)
+	else if (reg == C_REG)
 	{
 		current->reg_c = new_value;
 	}
-	else if (reg == 6)
+	else if (reg == D_REG)
 	{
 		current->reg_d = new_value;
 	}
-	else if (reg == 7)
+	else if (reg == IPLOC_REG)
 	{
 		current->iploc = new_value;
 	}
-	else if (reg >= 8 && reg <= 15)
+	else if (reg == ENERGY_IREG || reg == LOGO_IREG || reg == GUESS_IREG || reg == A_IREG || reg == B_IREG || reg == C_IREG || reg == D_IREG || reg == IPLOC_IREG)
 	{
 		throw "Cannot set registers in another organism!";
 	}
@@ -364,39 +400,39 @@ int get(int x, int y, int reg, CellState*** world_state, int world_size)
 {
 	CellState* current = world_state[x][y];
 	CellState* iploc_cell = world_state[iploc_x(x, y, current->iploc) % world_size][iploc_y(x, y, current->iploc) % world_size];
-	if (reg == 0)
+	if (reg == ENERGY_REG)
 	{
 		return current->energy;
 	}
-	else if (reg == 1)
+	else if (reg == LOGO_REG)
 	{
 		return current->logo;
 	}
-	else if (reg == 2)
+	else if (reg == GUESS_REG)
 	{
 		return current->guess;
 	}
-	else if (reg == 3)
+	else if (reg == A_REG)
 	{
 		return current->reg_a;
 	}
-	else if (reg == 4)
+	else if (reg == B_REG)
 	{
 		return current->reg_b;
 	}
-	else if (reg == 5)
+	else if (reg == C_REG)
 	{
 		return current->reg_c;
 	}
-	else if (reg == 6)
+	else if (reg == D_REG)
 	{
 		return current->reg_d;
 	}
-	else if (reg == 7)
+	else if (reg == IPLOC_REG)
 	{
 		return current->iploc;
 	}
-	else if (reg >= 8 && reg <= 15)
+	else if (reg == ENERGY_IREG ||reg == LOGO_IREG ||reg == GUESS_IREG ||reg == A_IREG ||reg == B_IREG ||reg == C_IREG ||reg == D_IREG  ||reg == IPLOC_IREG)
 	{
 		int new_x = iploc_x(x, y, current->iploc) % world_size;
 		int new_y = iploc_y(x, y, current->iploc) % world_size;
