@@ -138,6 +138,9 @@ void ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 
 int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 {
+	/*
+	Returns the location of the next closest template match from initial_ip. 
+	*/
 	int current_ip = initial_ip+1;
 	bool in_initial_template = true;
 	bool testing_template = false;
@@ -166,20 +169,29 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 					current_template_start = current_ip;
 					current_template_length = 0;
 					testing_template = true;
+					//cout << "Testing template at " << current_template_start << endl;
 				}
 
 				current_template_length++;
 				int initial_template_position = (initial_ip + current_template_length)%NUMBER_OF_GENES;
 				if (current_template_length > initial_template_length)
 				{
+					//Current Template exceeds the length of original template.
+					//cout << "Done with current template @ " << current_ip << ". Score = " << current_template_score << endl;
 					testing_template = false;
 					if (best_template_score < current_template_score)
 					{
 						best_template_score = current_template_score;
 						best_template_start = current_template_start;
 					}
+					if (best_template_score == initial_template_length)
+					{
+						return best_template_start;
+					}
 				}
-				if (current_cell->genes[initial_template_position] == current_cell->genes[current_ip])
+				//cout << "Current Template Length " << current_template_length << endl;
+				//cout << get_instruction_name(current_cell->genes[initial_template_position-1]) << "?=" << get_instruction_name(current_cell->genes[current_ip]) << endl;
+				if (current_cell->genes[initial_template_position-1] == current_cell->genes[current_ip])
 				{
 					current_template_score++;
 				}
@@ -190,10 +202,13 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 		{
 			if (in_initial_template)
 			{
+				//cout << "Length of original template " << initial_template_length << endl;
 				in_initial_template = false;
 			}
 			else if (testing_template)
 			{
+				//Reached end of template
+				//cout << "Done with current template @ " << current_ip << ". Score = " << current_template_score << endl;
 				testing_template = false;
 				if (best_template_score < current_template_score)
 				{
@@ -207,6 +222,7 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 	}
 	if (best_template_start == -1)
 	{
+		//cout << "No other templates found" << endl;
 		return initial_ip;
 	}
 	return best_template_start;
@@ -216,6 +232,10 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 {
 	CellState* current = world_state[x][y];
 	int instruction = current->genes[current->ip];
+
+	//cout << "Executing '" << get_instruction_name(instruction) << "', at IP " << current->ip << endl;
+
+	current->ip = ((current->ip) + 1) % NUMBER_OF_GENES;
 
 	int R1 = get_R1(instruction);
 	int R2 = get_R2(instruction);
@@ -237,6 +257,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		else if (op == JMP_COP)
 		{
 			current->ip = find(x, y, world_state, current->ip);
+			//cout << "Jumping forward to " << current->ip << endl;
 		}
 		else if (op == JPC_COP)
 		{
