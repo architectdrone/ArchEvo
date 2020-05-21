@@ -23,6 +23,7 @@ void CellState::make_random()
 	}
 	energy = INITIAL_ENERGY;
 	logo = NVO_LOGO;
+	lineage_length = 0;
 }
 
 void CellState::make_child(CellState parent)
@@ -62,5 +63,6 @@ void CellState::make_child(CellState parent)
 	}
 	//cout << "TOTAL MUTATIONS: " << mutations << endl;
 	//cout << "MUTATION RATE: " << (float)mutations / (float)(NUMBER_OF_GENES * 11) << endl;
-	logo = parent.logo;
+	//logo = parent.logo;
+	lineage_length = parent.lineage_length + 1;
 }

@@ -136,7 +136,15 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 {
 	if (world_state[parent_x][parent_y]->energy > INITIAL_ENERGY)
 	{
-		cout << "Cell has successfully reproduced. " << endl;
+		cout << "Cell has successfully reproduced. ";
+		if (world_state[parent_x][parent_y]->lineage_length == 0)
+		{
+			cout << "Ex Nihilo" << endl;
+		}
+		else
+		{
+			cout << "CHILD OF CHILD!" << endl;
+		}
 		world_state[parent_x][parent_y]->energy -= INITIAL_ENERGY; //Deduct required energy
 		world_state[child_x][child_y] = new CellState();
 		world_state[child_x][child_y]->make_child(*world_state[parent_x][parent_y]);
@@ -260,6 +268,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 	//cout << "Executing '" << get_instruction_name(instruction) << "', at IP " << current->ip << endl;
 
 	current->ip = ((current->ip) + 1) % NUMBER_OF_GENES;
+	current->age += 1;
 
 	int R1 = get_R1(instruction);
 	int R2 = get_R2(instruction);
@@ -376,6 +385,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 				new_R1 = 0x00;
 			}
 		}
+		set_reg(x, y, R1, new_R1, world_state, world_size);
 	}
 }
 
@@ -386,11 +396,11 @@ void ISA::set_reg(int x, int y, int reg, int new_value, CellState*** world_state
 	{
 		throw "Cannot Set Energy Directly!";
 	}
-	else if (reg = LOGO_REG)
+	else if (reg == LOGO_REG)
 	{
 		current->logo = new_value;
 	}
-	else if (reg = GUESS_REG)
+	else if (reg == GUESS_REG)
 	{
 		current->guess = new_value;
 	}
@@ -690,6 +700,7 @@ void ISA::print_info(CellState* cell)
 	cout << "LOGO: " << cell->logo << " GUESS: " << cell->guess << endl;
 	cout << "IPLOC: " << cell->iploc << " (" << bitset<8>(cell->iploc) << " -> (" << iploc_x(0, 0, cell->iploc) << ", " << iploc_y(0, 0, cell->iploc) << "))" << endl;
 	cout << "A: " << cell->reg_a << " B: " << cell->reg_b << " C: " << cell->reg_c << " D: " << cell->reg_d << endl;
+	cout << "Age: " << cell->age << " Lineage: " << cell->lineage_length << " Species ID: " << cell->species_id << endl;
 	cout << "Next Instruction (" << cell->ip << "): [" << bitset<11>(cell->genes[cell->ip]) << "] " << get_instruction_name(cell->genes[cell->ip]) << endl;
 }
 void ISA::print_genome(CellState* cell)

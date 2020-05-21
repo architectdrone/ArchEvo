@@ -26,11 +26,20 @@ int main()
 		world[random_x][random_y]->make_random();
 		iterations++;		
 		
+		bool print_time = iterations % 10000 == 0;
+
+		int NVO_count = 0;
+		int valid_organism_count = 0;
+
 		for (int x = 0; x < size; x++)
 		{
 			for (int y = 0; y < size; y++)
 			{
 				ISA::execute(x, y, world, size);
+				if (world[x][y] != nullptr && world[x][y]->lineage_length != 0)
+				{
+					ISA::print_info(world[x][y]);
+				}
 			}
 		}
 	}
