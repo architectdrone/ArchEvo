@@ -8,13 +8,16 @@
 using namespace std;
 void CellState::make_random()
 {
+	
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
 	{
-		for (int bit = 0; bit < 7; bit++)
+		for (int bit = 0; bit < 11; bit++)
 		{
-			if (rand() > 0.5)
+			float random_num = ((double)rand() / (RAND_MAX));
+			genes[gene] = genes[gene] << 1;
+			if (random_num > 0.5)
 			{
-				genes[gene] += int(pow(2, bit));
+				genes[gene] += 1;
 			}
 		}
 	}

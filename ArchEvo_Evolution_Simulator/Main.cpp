@@ -26,7 +26,6 @@ int main()
 		int random_y = rand() % (size);
 		world[random_x][random_y] = new CellState();
 		world[random_x][random_y]->make_random();
-		ISA::print_genome(world[random_x][random_y]);
 		for (int x = 0; x < size; x++)
 		{
 			for (int y = 0; y < size; y++)
