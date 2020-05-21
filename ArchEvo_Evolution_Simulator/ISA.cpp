@@ -100,7 +100,9 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 	int damage = 0;
 	if (world_state[victim_x][victim_y] != nullptr)
 	{
+		
 		int logo = world_state[victim_x][victim_y]->logo;
+		//cout << "Cell at " << attacker_x << ", " << attacker_y << " strikes! LOGO: " << bitset<8>(logo) << " GUESS: " << bitset<8>(guess) << endl;
 		int correct_bits = 0;
 		for (int i = 0; i < 8; i++)
 		{
@@ -111,11 +113,11 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 				correct_bits++;
 			}
 		}
-		damage = correct_bits - 4;
+		damage = (world_state[victim_x][victim_y]->energy)/(9-correct_bits);
 		//On perfect guess, do critical damage.
-		if (correct_bits == 8)
+		if (correct_bits == 0)
 		{
-			damage *= 2;
+			damage = -5;
 		}
 	}
 	else
@@ -136,7 +138,6 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 	{
 		cout << "Cell has successfully reproduced. " << endl;
 		world_state[parent_x][parent_y]->energy -= INITIAL_ENERGY; //Deduct required energy
-		print_genome(world_state[parent_x][parent_y]);
 		world_state[child_x][child_y] = new CellState();
 		world_state[child_x][child_y]->make_child(*world_state[parent_x][parent_y]);
 		world_state[child_x][child_y]->energy = INITIAL_ENERGY;
@@ -277,8 +278,8 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		{
 			if (reproduce(x, y, target_x, target_y, world_state))
 			{
-				print_info(world_state[target_x][target_y]);
-				print_genome(world_state[target_x][target_y]);
+				//print_info(world_state[target_x][target_y]);
+				//print_genome(world_state[target_x][target_y]);
 			}
 			//cout << "Child: " << endl;
 			

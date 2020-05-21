@@ -4,7 +4,7 @@
 using namespace std;
 int main()
 {
-	const int size = 100;
+	const int size = 25;
 	CellState*** world = new CellState**[size];
 	for (int x = 0; x < size; x++)
 	{
@@ -24,7 +24,6 @@ int main()
 		int random_y = rand() % (size);
 		world[random_x][random_y] = new CellState();
 		world[random_x][random_y]->make_random();
-		world[random_x][random_y]->appear_iteration = iterations;
 		iterations++;		
 		
 		for (int x = 0; x < size; x++)

@@ -1,7 +1,7 @@
 #pragma once
 #define NUMBER_OF_GENES 64
 #define MUTATION_RATE 0.01 //Chance of a single bit in a single cell flipping.
-#define NVO_LOGO 255
+#define NVO_LOGO 0
 #define INITIAL_ENERGY 64
 class CellState
 {
@@ -20,6 +20,4 @@ public:
 	int reg_c  = 0;
 	int reg_d  = 0;
 	int iploc  = 0;
-
-	
 };
