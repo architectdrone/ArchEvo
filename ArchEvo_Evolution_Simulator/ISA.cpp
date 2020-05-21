@@ -134,7 +134,7 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 
 bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state)
 {
-	if (world_state[parent_x][parent_y]->energy > INITIAL_ENERGY)
+	if (world_state[parent_x][parent_y]->energy > INITIAL_ENERGY+1)
 	{
 		//cout << "Cell has successfully reproduced. ";
 		if (world_state[parent_x][parent_y]->lineage_length == 0)
