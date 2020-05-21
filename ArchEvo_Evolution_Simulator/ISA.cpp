@@ -7,7 +7,11 @@
 #include <bitset>
 using namespace std;
 
-using namespace std;
+int true_mod(int n, int m)
+{
+	return (m + (n % m)) % m;
+}
+
 int ISA::iploc_x(int x, int y, int iploc)
 {
 	if (iploc >= 128)
@@ -130,6 +134,8 @@ void ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 {
 	if (world_state[parent_x][parent_y]->energy > INITIAL_ENERGY)
 	{
+		cout << "Cell has successfully reproduced. " << endl;
+		print_genome(world_state[parent_x][parent_y]);
 		world_state[child_x][child_y] = new CellState();
 		world_state[child_x][child_y]->make_child(*world_state[parent_x][parent_y]);
 		world_state[child_x][child_y]->energy = INITIAL_ENERGY;
@@ -249,8 +255,8 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 	int R1_value = get_reg(x, y, R1, world_state, world_size);
 	int R2_value = get_reg(x, y, R2, world_state, world_size);
 
-	int target_x = iploc_x(x, y, current->iploc)%world_size;
-	int target_y = iploc_y(x, y, current->iploc)%world_size;
+	int target_x = true_mod(iploc_x(x, y, current->iploc),world_size);
+	int target_y = true_mod(iploc_y(x, y, current->iploc), world_size);
 
 	if (R1 == ENERGY_REG || (R1 > IPLOC_REG))
 	{
@@ -405,7 +411,7 @@ void ISA::set_reg(int x, int y, int reg, int new_value, CellState*** world_state
 int ISA::get_reg(int x, int y, int reg, CellState*** world_state, int world_size)
 {
 	CellState* current = world_state[x][y];
-	CellState* iploc_cell = world_state[iploc_x(x, y, current->iploc) % world_size][iploc_y(x, y, current->iploc) % world_size];
+	CellState* iploc_cell = world_state[true_mod(iploc_x(x, y, current->iploc), world_size)][true_mod(iploc_y(x, y, current->iploc), world_size)];
 	if (reg == ENERGY_REG)
 	{
 		return current->energy;
@@ -440,8 +446,12 @@ int ISA::get_reg(int x, int y, int reg, CellState*** world_state, int world_size
 	}
 	else if (reg == ENERGY_IREG ||reg == LOGO_IREG ||reg == GUESS_IREG ||reg == A_IREG ||reg == B_IREG ||reg == C_IREG ||reg == D_IREG  ||reg == IPLOC_IREG)
 	{
-		int new_x = iploc_x(x, y, current->iploc) % world_size;
-		int new_y = iploc_y(x, y, current->iploc) % world_size;
+		int new_x = true_mod(iploc_x(x, y, current->iploc),  world_size);
+		int new_y = true_mod(iploc_y(x, y, current->iploc),  world_size);
+		if ((world_state[new_x][new_y]) == nullptr)
+		{
+			return 0;
+		}
 		return get_reg(new_x, new_y, reg - 8, world_state, world_size);
 	}
 	else

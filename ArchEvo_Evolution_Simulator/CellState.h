@@ -1,5 +1,5 @@
 #pragma once
-#define NUMBER_OF_GENES 10
+#define NUMBER_OF_GENES 64
 #define MUTATION_RATE 0.01 //Chance of a single bit in a single cell flipping.
 #define NVO_LOGO 255
 #define INITIAL_ENERGY 64
