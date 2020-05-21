@@ -38,7 +38,7 @@ int ISA::iploc_x(int x, int y, int iploc)
 	{
 		return x + 0;
 	}
-	else if (iploc >= 1)
+	else
 	{
 		return x - 1;
 	}
@@ -74,7 +74,7 @@ int ISA::iploc_y(int x, int y, int iploc)
 	{
 		return y - 1;
 	}
-	else if (iploc >= 1)
+	else
 	{
 		return y - 1;
 	}
@@ -643,4 +643,20 @@ int ISA::create_instruction(int OP, int R1, int R2)
 	instruction = instruction << 3;
 	instruction += OP;
 	return instruction;
+}
+
+void ISA::print_info(CellState* cell)
+{
+	cout << "ENERGY: " << cell->energy << endl;
+	cout << "LOGO: " << cell->logo << " GUESS: " << cell->guess << endl;
+	cout << "IPLOC: " << cell->iploc << " (" << bitset<8>(cell->iploc) << " -> (" << iploc_x(0, 0, cell->iploc) << ", " << iploc_y(0, 0, cell->iploc) << "))" << endl;
+	cout << "A: " << cell->reg_a << " B: " << cell->reg_b << " C: " << cell->reg_c << " D: " << cell->reg_d << endl;
+	cout << "Next Instruction (" << cell->ip << "): [" << bitset<11>(cell->genes[cell->ip]) << "] " << get_instruction_name(cell->genes[cell->ip]) << endl;
+}
+void ISA::print_genome(CellState* cell)
+{
+	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
+	{
+		cout << gene << " [" << bitset<11>(cell->genes[gene]) << "] " << get_instruction_name(cell->genes[gene]) << endl;
+	}
 }

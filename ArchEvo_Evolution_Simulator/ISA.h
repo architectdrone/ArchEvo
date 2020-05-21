@@ -62,6 +62,8 @@ class ISA
         
     public:
         static void execute(int x, int y, CellState*** world_state, int world_size);
+        static void print_info(CellState* cell);
+        static void print_genome(CellState* cell);
         static string get_instruction_name(int instruction);
         static int create_instruction(int OP);
         static int create_instruction(int OP, int R, bool cop = false);

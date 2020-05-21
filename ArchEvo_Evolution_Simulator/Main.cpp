@@ -29,6 +29,9 @@ int main()
 
 	world[1][1] = new_cell_state;
 
+	ISA::print_info(world[1][1]);
+	ISA::print_genome(world[1][1]);
+
 	for (int i = 0; i < NUMBER_OF_GENES * 2; i++)
 	{
 		ISA::execute(1, 1, world, size);
