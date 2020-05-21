@@ -231,6 +231,10 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 {
 	CellState* current = world_state[x][y];
+	if (current == nullptr)
+	{
+		return;
+	}
 	int instruction = current->genes[current->ip];
 
 	//cout << "Executing '" << get_instruction_name(instruction) << "', at IP " << current->ip << endl;
@@ -253,7 +257,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		if (op == DIV_COP)
 		{
 			reproduce(x, y, target_x, target_y, world_state);
-			cout << "Child: " << endl;
+			//cout << "Child: " << endl;
 			print_info(world_state[target_x][target_y]);
 			print_genome(world_state[target_x][target_y]);
 		}
@@ -650,6 +654,10 @@ int ISA::create_instruction(int OP, int R1, int R2)
 
 void ISA::print_info(CellState* cell)
 {
+	if (cell == nullptr)
+	{
+		cout << "Empty..." << endl;
+	}
 	cout << "ENERGY: " << cell->energy << endl;
 	cout << "LOGO: " << cell->logo << " GUESS: " << cell->guess << endl;
 	cout << "IPLOC: " << cell->iploc << " (" << bitset<8>(cell->iploc) << " -> (" << iploc_x(0, 0, cell->iploc) << ", " << iploc_y(0, 0, cell->iploc) << "))" << endl;
@@ -658,6 +666,10 @@ void ISA::print_info(CellState* cell)
 }
 void ISA::print_genome(CellState* cell)
 {
+	if (cell == nullptr)
+	{
+		cout << "Empty..." << endl;
+	}
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
 	{
 		cout << gene << " [" << bitset<11>(cell->genes[gene]) << "] " << get_instruction_name(cell->genes[gene]) << endl;

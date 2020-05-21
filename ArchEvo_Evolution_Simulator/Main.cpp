@@ -16,7 +16,7 @@ int main()
 	}
 
 	CellState* new_cell_state = new CellState();
-	new_cell_state->genes[0] = ISA::create_instruction(DIV_COP); //Should jump to ip=5
+	new_cell_state->genes[0] = ISA::create_instruction(MOV_COP); //Should move to (0, 0)
 	new_cell_state->genes[1] = ISA::create_instruction(NPA_COP);
 	new_cell_state->genes[2] = ISA::create_instruction(NPB_COP);
 	new_cell_state->genes[3] = ISA::create_instruction(IGN_COP);
@@ -33,8 +33,7 @@ int main()
 	ISA::print_info(world[1][1]);
 	ISA::print_genome(world[1][1]);
 
-	for (int i = 0; i < NUMBER_OF_GENES * 2; i++)
-	{
-		ISA::execute(1, 1, world, size);
-	}
+	ISA::execute(1, 1, world, size);
+
+	ISA::print_info(world[0][0]);
 }
