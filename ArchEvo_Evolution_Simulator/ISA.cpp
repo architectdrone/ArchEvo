@@ -88,20 +88,26 @@ int ISA::get_bit(int byte, int bit_num)
 
 void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, CellState*** world_state)
 {
+	if (world_state[attacker_x][attacker_y] == nullptr)
+	{
+		throw "Empty cell attempts to attack?";
+	}
 	int guess = world_state[attacker_x][attacker_y]->guess;
 	int damage = 0;
 	if (world_state[victim_x][victim_y] != nullptr)
 	{
 		int logo = world_state[victim_x][victim_y]->logo;
-		int correct_bits = -4;
+		int correct_bits = 0;
 		for (int i = 0; i < 8; i++)
 		{
-			if (get_bit(guess, i) == get_bit(logo, i))
+			int guess_bit = (guess >> i) & 0b1;
+			int logo_bit = (logo >> i) & 0b1;
+			if (guess_bit == logo_bit)
 			{
 				correct_bits++;
 			}
 		}
-		int damage = correct_bits - 4;
+		damage = correct_bits - 4;
 		//On perfect guess, do critical damage.
 		if (correct_bits == 8)
 		{
@@ -111,13 +117,8 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 	else
 	{
 		damage = -4;
-		return;
 	}
 	
-
-	
-	
-
 	world_state[attacker_x][attacker_y]->energy += damage;
 	if (damage > 0)
 	{
@@ -657,6 +658,7 @@ void ISA::print_info(CellState* cell)
 	if (cell == nullptr)
 	{
 		cout << "Empty..." << endl;
+		return;
 	}
 	cout << "ENERGY: " << cell->energy << endl;
 	cout << "LOGO: " << cell->logo << " GUESS: " << cell->guess << endl;
@@ -669,6 +671,7 @@ void ISA::print_genome(CellState* cell)
 	if (cell == nullptr)
 	{
 		cout << "Empty..." << endl;
+		return;
 	}
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
 	{

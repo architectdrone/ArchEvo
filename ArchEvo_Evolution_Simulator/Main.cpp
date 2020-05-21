@@ -16,24 +16,32 @@ int main()
 	}
 
 	CellState* new_cell_state = new CellState();
-	new_cell_state->genes[0] = ISA::create_instruction(MOV_COP); //Should move to (0, 0)
-	new_cell_state->genes[1] = ISA::create_instruction(NPA_COP);
-	new_cell_state->genes[2] = ISA::create_instruction(NPB_COP);
-	new_cell_state->genes[3] = ISA::create_instruction(IGN_COP);
-	new_cell_state->genes[4] = ISA::create_instruction(IGN_COP);
-	new_cell_state->genes[5] = ISA::create_instruction(NPA_COP);
-	new_cell_state->genes[6] = ISA::create_instruction(NPB_COP);
-	new_cell_state->genes[7] = ISA::create_instruction(IGN_COP);
-	new_cell_state->genes[8] = ISA::create_instruction(IGN_COP);
-	new_cell_state->genes[9] = ISA::create_instruction(IGN_COP);
+	for (int i = 0; i < NUMBER_OF_GENES; i++)
+	{
+		new_cell_state->genes[i] = ISA::create_instruction(ATK_COP);
+	}
 	new_cell_state->energy = 128;
-
+	new_cell_state->guess = 0b11111110;
 	world[1][1] = new_cell_state;
 
-	ISA::print_info(world[1][1]);
-	ISA::print_genome(world[1][1]);
+	
+	CellState* victim = new CellState;
+	for (int i = 0; i < NUMBER_OF_GENES; i++)
+	{
+		victim->genes[i] = ISA::create_instruction(IGN_COP);
+	}
+	victim->energy = 128;
+	victim->logo = 0b11111111;
+	world[0][0] = victim;
 
-	ISA::execute(1, 1, world, size);
-
-	ISA::print_info(world[0][0]);
+	for (int i = 0; i < 10; i++)
+	{
+		cout << "ATTACKER--------------------------" << endl;
+		ISA::print_info(world[1][1]);
+		cout << "----------------------------------" << endl;
+		cout << "DEFENDER--------------------------" << endl;
+		ISA::print_info(world[0][0]);
+		cout << "----------------------------------" << endl;
+		ISA::execute(1, 1, world, size);
+	}
 }
