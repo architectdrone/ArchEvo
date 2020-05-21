@@ -11,7 +11,7 @@ void CellState::make_random()
 		{
 			if (rand() > 0.5)
 			{
-				genes[gene] += pow(2, bit);
+				genes[gene] += int(pow(2, bit));
 			}
 		}
 	}
@@ -27,12 +27,12 @@ void CellState::make_child(CellState parent)
 		{
 			if (rand() > MUTATION_RATE)
 			{
-				genes[gene] += pow(2, parent.genes[gene] >> bit);
+				genes[gene] += (int(pow(2, parent.genes[gene])) >> bit);
 			}
 			else
 			{
 				mutations++;
-				genes[gene] += pow(2, (parent.genes[gene] >> bit)+1);
+				genes[gene] += ((int(pow(2, parent.genes[gene])) >> bit)+1);
 			}
 		}
 	}
