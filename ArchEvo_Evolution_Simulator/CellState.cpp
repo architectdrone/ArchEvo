@@ -21,6 +21,7 @@ void CellState::make_random()
 			}
 		}
 	}
+	energy = INITIAL_ENERGY;
 	logo = NVO_LOGO;
 }
 

@@ -248,10 +248,20 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 	{
 		return;
 	}
+
+	if (current->appear_iteration == 0)
+	{
+		cout << "------------------------" << endl;
+		print_info(current);
+		cout << "------------------------" << endl;
+	}
+	
+
 	int instruction = current->genes[current->ip];
 	current->energy -= 1;
 	if (current->energy <= 0)
 	{
+		cout << "Cell starved" << endl;
 		delete world_state[x][y];
 		world_state[x][y] = nullptr;
 		return;

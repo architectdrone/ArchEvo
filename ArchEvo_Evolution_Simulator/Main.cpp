@@ -20,12 +20,13 @@ int main()
 	while (true)
 	{
 		cout << "Iteration " << iterations << endl;
-		iterations++;
-		//Create NVO
 		int random_x = rand() % (size);
 		int random_y = rand() % (size);
 		world[random_x][random_y] = new CellState();
 		world[random_x][random_y]->make_random();
+		world[random_x][random_y]->appear_iteration = iterations;
+		iterations++;		
+		
 		for (int x = 0; x < size; x++)
 		{
 			for (int y = 0; y < size; y++)

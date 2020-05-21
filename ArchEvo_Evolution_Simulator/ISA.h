@@ -45,7 +45,7 @@ class ISA
         static int iploc_y(int x, int y, int iploc);
         static int get_bit(int byte, int bit_num);
         static void attack(int attacker_x, int attacker_y, int victim_x, int victim_y, CellState*** world_state);
-        static void reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state);
+        static bool reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state);
         static int find(int x, int y, CellState*** world_state, int initial_ip);
         static void set_reg(int x, int y, int reg, int new_value, CellState*** world_state, int world_size);
         static int get_reg(int x, int y, int reg, CellState*** world_state, int world_size);
