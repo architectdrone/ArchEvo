@@ -1,5 +1,5 @@
 #pragma once
-#define NUMBER_OF_GENES 64
+#define NUMBER_OF_GENES 32
 #define MUTATION_RATE 0.01 //Chance of a single bit in a single cell flipping.
 #define NVO_LOGO 0
 #define INITIAL_ENERGY 64
@@ -27,4 +27,5 @@ public:
 	int age = 0;
 	int lineage_length = 0;
 	int species_id = 0;
+	int virility = 0;
 };

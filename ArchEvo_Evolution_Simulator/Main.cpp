@@ -17,30 +17,66 @@ int main()
 
 	//Main Loop
 	int iterations = 0;
+	const int print_rate = 100000;
 	while (true)
 	{
-		cout << "Iteration " << iterations << endl;
+		
 		int random_x = rand() % (size);
 		int random_y = rand() % (size);
-		world[random_x][random_y] = new CellState();
-		world[random_x][random_y]->make_random();
+
+		if (world[random_x][random_y] == nullptr)
+		{
+			world[random_x][random_y] = new CellState();
+			world[random_x][random_y]->make_random();
+		}
+
+		
 		iterations++;		
 		
-		bool print_time = iterations % 10000 == 0;
+		bool print_time = iterations % print_rate == 0;
 
-		int NVO_count = 0;
+		int organism_count = 0;
 		int valid_organism_count = 0;
+
+		CellState* longest_lineage = nullptr;
 
 		for (int x = 0; x < size; x++)
 		{
 			for (int y = 0; y < size; y++)
 			{
 				ISA::execute(x, y, world, size);
-				if (world[x][y] != nullptr && world[x][y]->lineage_length != 0)
+				if (world[x][y] != nullptr)
 				{
-					ISA::print_info(world[x][y]);
+					organism_count++;
+					if (world[x][y]->lineage_length > 1)
+					{
+						valid_organism_count++;
+						if (print_time)
+						{
+							cout << "------------------------------------------" << endl;
+							ISA::print_info(world[x][y]);
+							cout << "------------------------------------------" << endl;
+							if (longest_lineage == nullptr)
+							{
+								longest_lineage = world[x][y];
+							}
+							else if (longest_lineage->lineage_length < world[x][y]->lineage_length)
+							{
+								longest_lineage = world[x][y];
+							}
+						}
+					}
 				}
 			}
 		}
+		if (print_time)
+		{
+			cout << "BEST GENOME: " << endl;
+			ISA::print_genome(longest_lineage);
+			int num;
+			cin >> num;
+		}
+		cout << "Iteration " << iterations << " O: " << organism_count << " V: " << valid_organism_count << endl;
 	}
+	
 }

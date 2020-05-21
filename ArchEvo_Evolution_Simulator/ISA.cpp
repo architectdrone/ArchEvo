@@ -136,16 +136,17 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 {
 	if (world_state[parent_x][parent_y]->energy > INITIAL_ENERGY)
 	{
-		cout << "Cell has successfully reproduced. ";
+		//cout << "Cell has successfully reproduced. ";
 		if (world_state[parent_x][parent_y]->lineage_length == 0)
 		{
-			cout << "Ex Nihilo" << endl;
+			//cout << "Ex Nihilo" << endl;
 		}
 		else
 		{
-			cout << "CHILD OF CHILD!" << endl;
+			//cout << "CHILD OF CHILD!" << endl;
 		}
 		world_state[parent_x][parent_y]->energy -= INITIAL_ENERGY; //Deduct required energy
+		world_state[parent_x][parent_y]->virility += 1;
 		world_state[child_x][child_y] = new CellState();
 		world_state[child_x][child_y]->make_child(*world_state[parent_x][parent_y]);
 		world_state[child_x][child_y]->energy = INITIAL_ENERGY;
@@ -258,7 +259,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		return;
 	}
 	int instruction = current->genes[current->ip];
-	current->energy -= 1;
+	//current->energy -= 1;
 	if (current->energy <= 0)
 	{
 		delete world_state[x][y];
@@ -700,7 +701,7 @@ void ISA::print_info(CellState* cell)
 	cout << "LOGO: " << cell->logo << " GUESS: " << cell->guess << endl;
 	cout << "IPLOC: " << cell->iploc << " (" << bitset<8>(cell->iploc) << " -> (" << iploc_x(0, 0, cell->iploc) << ", " << iploc_y(0, 0, cell->iploc) << "))" << endl;
 	cout << "A: " << cell->reg_a << " B: " << cell->reg_b << " C: " << cell->reg_c << " D: " << cell->reg_d << endl;
-	cout << "Age: " << cell->age << " Lineage: " << cell->lineage_length << " Species ID: " << cell->species_id << endl;
+	cout << "Age: " << cell->age << " Lineage: " << cell->lineage_length << " Species ID: " << cell->species_id << " Virility: " << cell->virility << endl;
 	cout << "Next Instruction (" << cell->ip << "): [" << bitset<11>(cell->genes[cell->ip]) << "] " << get_instruction_name(cell->genes[cell->ip]) << endl;
 }
 void ISA::print_genome(CellState* cell)
