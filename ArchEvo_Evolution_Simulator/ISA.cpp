@@ -253,6 +253,9 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		if (op == DIV_COP)
 		{
 			reproduce(x, y, target_x, target_y, world_state);
+			cout << "Child: " << endl;
+			print_info(world_state[target_x][target_y]);
+			print_genome(world_state[target_x][target_y]);
 		}
 		else if (op == JMP_COP)
 		{

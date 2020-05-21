@@ -3,6 +3,9 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <cmath>
+#include <iostream>
+#include <bitset>
+using namespace std;
 void CellState::make_random()
 {
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
@@ -20,21 +23,40 @@ void CellState::make_random()
 
 void CellState::make_child(CellState parent)
 {
+	//cout << "MAKING A BABY" << endl;
 	int mutations = 0;
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
 	{
-		for (int bit = 0; bit < 7; bit++)
+		//cout << "\tParent Gene " << bitset<11>(parent.genes[gene]) << endl;
+		for (int bit = 11; bit >= 0; --bit)
 		{
-			if (rand() > MUTATION_RATE)
+			genes[gene] = genes[gene] << 1;
+			float random_num = ((double)rand() / (RAND_MAX));
+			int parent_bit = (parent.genes[gene] >> (bit)) & 0b1;
+			//cout << "\t\tBit #" << bit << " : " << parent_bit << "R: " << random_num <<  endl;
+			
+			if (random_num > MUTATION_RATE)
 			{
-				genes[gene] += (int(pow(2, parent.genes[gene])) >> bit);
+				genes[gene] += parent_bit;
 			}
 			else
 			{
+				//cout << "\t\t\tMutated!" << endl;
 				mutations++;
-				genes[gene] += ((int(pow(2, parent.genes[gene])) >> bit)+1);
+				if (parent_bit == 1)
+				{
+					genes[gene] += 0;
+				}
+				else
+				{
+					genes[gene] += 1;
+				}
 			}
+			
+			//cout << "\t\tCurrent Gene " << bitset<11>(genes[gene]) << endl;
 		}
 	}
+	//cout << "TOTAL MUTATIONS: " << mutations << endl;
+	//cout << "MUTATION RATE: " << (float)mutations / (float)(NUMBER_OF_GENES * 11) << endl;
 	logo = parent.logo;
 }

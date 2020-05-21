@@ -16,7 +16,7 @@ int main()
 	}
 
 	CellState* new_cell_state = new CellState();
-	new_cell_state->genes[0] = ISA::create_instruction(JMP_COP); //Should jump to ip=5
+	new_cell_state->genes[0] = ISA::create_instruction(DIV_COP); //Should jump to ip=5
 	new_cell_state->genes[1] = ISA::create_instruction(NPA_COP);
 	new_cell_state->genes[2] = ISA::create_instruction(NPB_COP);
 	new_cell_state->genes[3] = ISA::create_instruction(IGN_COP);
@@ -26,6 +26,7 @@ int main()
 	new_cell_state->genes[7] = ISA::create_instruction(IGN_COP);
 	new_cell_state->genes[8] = ISA::create_instruction(IGN_COP);
 	new_cell_state->genes[9] = ISA::create_instruction(IGN_COP);
+	new_cell_state->energy = 128;
 
 	world[1][1] = new_cell_state;
 
