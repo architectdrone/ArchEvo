@@ -15,6 +15,8 @@ int main()
 		}
 	}
 
+
+	//ISA::init();
 	//Main Loop
 	int iterations = 0;
 	const int print_rate = 100000;
@@ -40,11 +42,16 @@ int main()
 
 		CellState* longest_lineage = nullptr;
 
+		if (print_time)
+		{
+			ISA::print_all_species();
+		}
+
 		for (int x = 0; x < size; x++)
 		{
 			for (int y = 0; y < size; y++)
 			{
-				ISA::execute(x, y, world, size);
+				ISA::execute(x, y, world, size, iterations);
 				if (world[x][y] != nullptr)
 				{
 					organism_count++;
@@ -53,9 +60,9 @@ int main()
 						valid_organism_count++;
 						if (print_time)
 						{
-							cout << "------------------------------------------" << endl;
-							ISA::print_info(world[x][y]);
-							cout << "------------------------------------------" << endl;
+							//cout << "------------------------------------------" << endl;
+							//ISA::print_info(world[x][y]);
+							//cout << "------------------------------------------" << endl;
 							if (longest_lineage == nullptr)
 							{
 								longest_lineage = world[x][y];
@@ -71,7 +78,9 @@ int main()
 		}
 		if (print_time)
 		{
-			cout << "BEST GENOME: " << endl;
+			cout << "--------------------------------------------------------" << endl;
+
+			ISA::print_info(longest_lineage);
 			ISA::print_genome(longest_lineage);
 			int num;
 			cin >> num;

@@ -1,6 +1,8 @@
 #pragma once
 #include "CellState.h"
+#include "Species.h"
 #include <string>
+#include <vector>
 using namespace std;
 
 #define ENERGY_REG  0b0000
@@ -45,7 +47,7 @@ class ISA
         static int iploc_y(int x, int y, int iploc);
         static int get_bit(int byte, int bit_num);
         static void attack(int attacker_x, int attacker_y, int victim_x, int victim_y, CellState*** world_state);
-        static bool reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state);
+        static bool reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state, int date);
         static int find(int x, int y, CellState*** world_state, int initial_ip);
         static void set_reg(int x, int y, int reg, int new_value, CellState*** world_state, int world_size);
         static int get_reg(int x, int y, int reg, CellState*** world_state, int world_size);
@@ -59,11 +61,15 @@ class ISA
         static string get_R2_name(int instruction);
         static string get_cell_op_name(int cell_op);
         static string get_reg_op_name(int reg_op);
+
+        
         
     public:
-        static void execute(int x, int y, CellState*** world_state, int world_size);
+        //static void init();
+        static void execute(int x, int y, CellState*** world_state, int world_size, int date);
         static void print_info(CellState* cell);
         static void print_genome(CellState* cell);
+		static void print_all_species();
         static string get_instruction_name(int instruction);
         static int create_instruction(int OP);
         static int create_instruction(int OP, int R, bool cop = false);

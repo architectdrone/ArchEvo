@@ -6,7 +6,45 @@
 #include <stdio.h>
 #include <bitset>
 using namespace std;
+const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
+vector<Species*> species_list = vector<Species*>();
+int next_species_id = 1;
 
+Species* get_species(int species_id)
+{
+	for (int i = 0; i < species_list.size(); i++)
+	{
+		if (species_list[i]->id == species_id)
+		{
+			return species_list[i];
+		}
+	}
+
+	return nullptr;
+}
+
+void delete_species(int species_id)
+{
+	for (int i = 0; i < species_list.size(); i++)
+	{
+		if (species_list[i]->id == species_id)
+		{
+			delete species_list[i];
+			species_list.erase(species_list.begin()+i);
+			return;
+		}
+	}
+}
+
+/*
+void ISA::init()
+{
+	Species first;
+	first.id = 0;
+	first.readable_id = "";
+	species_list.push_back(first);
+}
+*/
 int true_mod(int n, int m)
 {
 	return (m + (n % m)) % m;
@@ -128,11 +166,21 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 	world_state[attacker_x][attacker_y]->energy += damage;
 	if (damage > 0)
 	{
+		Species* attacker_species = get_species(world_state[attacker_x][attacker_y]->species_id);
+		Species* victim_species = get_species(world_state[victim_x][victim_y]->species_id);
+		if (attacker_species != nullptr)
+		{
+			attacker_species->register_eating(world_state[victim_x][victim_y]->species_id);
+		}
+		if (victim_species != nullptr)
+		{
+			victim_species->register_being_eaten(world_state[attacker_x][attacker_y]->species_id);
+		}
 		world_state[victim_x][victim_y]->energy -= damage;
 	}
 }
 
-bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state)
+bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state, int date)
 {
 	if (world_state[parent_x][parent_y]->energy > INITIAL_ENERGY+1)
 	{
@@ -150,6 +198,49 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 		world_state[child_x][child_y] = new CellState();
 		world_state[child_x][child_y]->make_child(*world_state[parent_x][parent_y]);
 		world_state[child_x][child_y]->energy = INITIAL_ENERGY;
+
+		Species* parent_species = get_species(world_state[parent_x][parent_y]->species_id);
+		CellState* child = world_state[child_x][child_y];
+		if (child->lineage_length > 2)
+		{
+			if (parent_species != 0 && parent_species->tolerable_difference(child))
+			{
+				//Member of species_list.
+				parent_species->register_birth();
+				child->species_id = parent_species->id;
+			}
+			else
+			{
+				//New species_list
+				Species* new_species = new Species();
+				new_species->arrival_date = date;
+				new_species->id = next_species_id++;
+				
+				for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
+				{
+					new_species->genome[gene] = child->genes[gene];
+				}
+
+				string original_name = "";
+				if (parent_species != nullptr)
+				{
+					original_name = parent_species->readable_id;
+					new_species->parent_id = parent_species->id;
+					parent_species->register_child_species(new_species->id);
+				}
+				else
+				{
+					original_name = "";
+					new_species->parent_id = 0;
+				}
+				
+				new_species->readable_id = original_name + letters[rand() % 26];
+				new_species->register_birth();
+				species_list.push_back(new_species);
+				child->species_id = new_species->id;
+			}
+		}
+		
 		return true;
 		
 	}
@@ -251,7 +342,7 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 	return best_template_start;
 }
 
-void ISA::execute(int x, int y, CellState*** world_state, int world_size)
+void ISA::execute(int x, int y, CellState*** world_state, int world_size, int date)
 {
 	CellState* current = world_state[x][y];
 	if (current == nullptr)
@@ -263,6 +354,17 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 	//Kill cell if energy is gone.
 	if (current->energy <= 0)
 	{
+		Species* the_species = get_species(current->species_id);
+		if (the_species != nullptr)
+		{
+			the_species->register_dying(current, date);
+			if (the_species->get_alive() == 0 && (the_species->get_total_alive() == 1 || (the_species->parent_id == 0 && the_species->all_children().size() == 0)))
+			{
+				delete_species(current->species_id);
+			}
+		}
+		
+
 		delete world_state[x][y];
 		world_state[x][y] = nullptr;
 		return;
@@ -290,12 +392,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		//Cell Operations
 		if (op == DIV_COP)
 		{
-			if (reproduce(x, y, target_x, target_y, world_state))
-			{
-				//print_info(world_state[target_x][target_y]);
-				//print_genome(world_state[target_x][target_y]);
-			}
-			//cout << "Child: " << endl;
+			reproduce(x, y, target_x, target_y, world_state, date);
 			
 		}
 		else if (op == JMP_COP)
@@ -719,5 +816,85 @@ void ISA::print_genome(CellState* cell)
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
 	{
 		cout << gene << " [" << bitset<11>(cell->genes[gene]) << "] " << get_instruction_name(cell->genes[gene]) << endl;
+	}
+}
+
+void ISA::print_all_species()
+{
+	for (int i = 0; i < species_list.size(); i++)
+	{
+		Species* species = species_list[i];
+		if (species->get_total_alive() > 1 && (species->parent_id != 0 || species->all_children().size() > 0))
+		{
+			cout << "----------------------------" << endl;
+
+			cout << "Species: " << species->readable_id << " (" << species->id << ")" << endl;
+			cout << "Lived from " << species->arrival_date << " - ";
+			if (species->get_extinction_date() != -1)
+			{
+				cout << species->get_extinction_date() << " (EXTINCT)" << endl;
+			}
+			else
+			{
+				cout << "PRESENT" << endl;
+			}
+			Species* parent_species = get_species(species->parent_id);
+			if (parent_species != nullptr)
+			{
+				cout << "Parent: " << parent_species->readable_id << " (" << species->parent_id << ")" << endl;
+			}
+			else
+			{
+				cout << "Parent: ROOT" << endl;
+			}
+			
+			cout << "Current: " << species->get_alive() << " Total: " << species->get_total_alive() << " Peak: " << species->get_peak_alive() << endl;
+			cout << "Average Age: " << species->average_age() << " Average Verility: " << species->average_virility() << endl;
+			cout << "Children: " << species->all_children().size() << endl;
+			vector<vector<int>> prey = species->all_prey();
+			cout << "Prey: " << endl;
+			int root_count = 0;
+			for (int j = 0; j < prey.size(); j++)
+			{
+				Species* prey_species = get_species(prey[j][0]);
+				if (prey_species != nullptr)
+				{
+					cout << "\t" << prey_species->readable_id << " : " << prey[j][1] << endl;
+				}
+				else
+				{
+					root_count += prey[j][1];
+				}
+			}
+			if (root_count != 0)
+			{
+				cout << "\tROOT: " << root_count << endl;
+			}
+
+			/*
+			
+			vector<vector<int>> predators = species->all_predators();
+			cout << "Predators: " << endl;
+			root_count = 0;
+			for (int j = 0; j < predators.size(); j++)
+			{
+				Species* predator_species = get_species(predators[j][0]);
+				if (predator_species != nullptr)
+				{
+					cout << "\t" << predator_species->readable_id << " : " << predators[j][1] << endl;
+				}
+				else
+				{
+					root_count += predators[j][1];
+				}
+			}
+			if (root_count != 0)
+			{
+				cout << "\tROOT: " << root_count << endl;
+			}
+			cout << "-------------------------" << endl;
+			*/
+		}
+
 	}
 }
