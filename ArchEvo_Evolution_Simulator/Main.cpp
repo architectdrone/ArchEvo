@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-	const int size = 25;
+	const int size = 10;
 	CellState*** world = new CellState**[size];
 	for (int x = 0; x < size; x++)
 	{
@@ -20,7 +20,7 @@ int main()
 
 	
 	Viewer::init(size);
-	Viewer::draw_mode = DRAW_LINEAGE;
+	Viewer::draw_mode = DRAW_SPECIES;
 	//ISA::init();
 	//Main Loop
 	int iterations = 0;

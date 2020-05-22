@@ -1,4 +1,5 @@
 #include "Viewer.h"
+#include "Species.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
 int Viewer::size = 0;
 
@@ -8,6 +9,7 @@ void Viewer::draw_cell(int x, int y, CellState* cell)
 	TCODColor cell_color;
 	int lineage = cell->lineage_length;
 	int cell_s;
+	Species* cell_species = nullptr;
 	switch (draw_mode)
 	{
 		case DRAW_LINEAGE:
@@ -23,6 +25,22 @@ void Viewer::draw_cell(int x, int y, CellState* cell)
 			cell_color.setSaturation((float)cell_s/100.0f);
 			cell_color.setValue(1.0f);
 			break;
+		case DRAW_SPECIES:
+			
+			cell_species = ISA::get_species(cell->species_id);
+			if (cell_species != nullptr)
+			{
+				cell_color = TCODColor::green;
+				cell_color.setHue(((float)((char)(cell_species->readable_id[0]) - 'a') / 26.0f) * 360);
+				cell_char = cell_species->readable_id.back();
+			}
+			else
+			{
+				cell_color = TCODColor::white;
+				cell_char = '~';
+			}
+			break;
+			
 		default:
 			cell_char = 'C';
 			cell_color = TCODColor::red;
@@ -33,7 +51,7 @@ void Viewer::draw_cell(int x, int y, CellState* cell)
 
 void Viewer::init(int _size)
 {
-	TCODConsole::initRoot(25, 25, "ArchEvo Viewer", false);
+	TCODConsole::initRoot(_size, _size, "ArchEvo Viewer", false);
 	size = _size;
 	draw_mode = DRAW_LINEAGE;
 }
