@@ -1,34 +1,9 @@
 #include "CellState.h"
 #include "ISA.h"
+#include "Viewer.h"
 #include "libtcod.hpp"
 #include <iostream>
 using namespace std;
-
-void draw_world(CellState*** world, int size)
-{
-	TCODConsole::root->clear();
-	TCOD_key_t key;
-	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
-	for (int x = 0; x < size; x++)
-	{
-		for (int y = 0; y < size; y++)
-		{
-
-			if (world[x][y] != nullptr)
-			{
-				if (world[x][y]->lineage_length > 2)
-				{
-					TCODConsole::root->putChar(x, y, 'V');
-				}
-				else
-				{
-					TCODConsole::root->putChar(x, y, '~');
-				}
-			}
-		}
-	}
-	TCODConsole::flush();
-}
 
 int main()
 {
@@ -43,8 +18,9 @@ int main()
 		}
 	}
 
-	TCODConsole::initRoot(25, 25, "libtcod C++ tutorial", false);
-
+	
+	Viewer::init(size);
+	Viewer::draw_mode = DRAW_LINEAGE;
 	//ISA::init();
 	//Main Loop
 	int iterations = 0;
@@ -105,7 +81,7 @@ int main()
 				}
 			}
 		}
-		draw_world(world, size);
+		Viewer::draw(world);
 		if (print_time)
 		{
 			cout << "--------------------------------------------------------" << endl;
