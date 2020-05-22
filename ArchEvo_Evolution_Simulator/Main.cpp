@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-	const int size = 10;
+	const int size = 25;
 	CellState*** world = new CellState**[size];
 	for (int x = 0; x < size; x++)
 	{
