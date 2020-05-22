@@ -2,7 +2,7 @@
 #include "Species.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
 int Viewer::size = 0;
-
+bool Viewer::fast_forward = false;
 void Viewer::draw_cell(int x, int y, CellState* cell)
 {
 	char cell_char;
@@ -61,16 +61,27 @@ void Viewer::draw(CellState*** world)
 	TCODConsole::root->clear();
 	TCOD_key_t key;
 	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
-	for (int x = 0; x < size; x++)
-	{
-		for (int y = 0; y < size; y++)
-		{
 
-			if (world[x][y] != nullptr)
+	switch (key.vk)
+	{
+	case TCODK_SPACE:
+		fast_forward = !fast_forward;
+	}
+
+	if (!fast_forward)
+	{
+		for (int x = 0; x < size; x++)
+		{
+			for (int y = 0; y < size; y++)
 			{
-				draw_cell(x, y, world[x][y]);
+
+				if (world[x][y] != nullptr)
+				{
+					draw_cell(x, y, world[x][y]);
+				}
 			}
 		}
+		TCODConsole::flush();
 	}
-	TCODConsole::flush();
+	
 }
