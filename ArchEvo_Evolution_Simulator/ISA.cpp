@@ -259,25 +259,29 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 		return;
 	}
 	int instruction = current->genes[current->ip];
-	//current->energy -= 1;
+
+	//Kill cell if energy is gone.
 	if (current->energy <= 0)
 	{
 		delete world_state[x][y];
 		world_state[x][y] = nullptr;
 		return;
 	}
-	//cout << "Executing '" << get_instruction_name(instruction) << "', at IP " << current->ip << endl;
+	
+	
+	current->ip = ((current->ip) + 1) % NUMBER_OF_GENES; //Increment Instruction Pointer
+	current->age += 1; //Increment Age
 
-	current->ip = ((current->ip) + 1) % NUMBER_OF_GENES;
-	current->age += 1;
-
+	//Names of the registers and operations
 	int R1 = get_R1(instruction);
 	int R2 = get_R2(instruction);
 	int op = get_OP(instruction);
 
+	//Values of the registers
 	int R1_value = get_reg(x, y, R1, world_state, world_size);
 	int R2_value = get_reg(x, y, R2, world_state, world_size);
 
+	//IPLOC values
 	int target_x = true_mod(iploc_x(x, y, current->iploc),world_size);
 	int target_y = true_mod(iploc_y(x, y, current->iploc), world_size);
 
@@ -392,6 +396,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size)
 
 void ISA::set_reg(int x, int y, int reg, int new_value, CellState*** world_state, int world_size)
 {
+	int true_value = true_mod(new_value, 0b11111111);
 	CellState* current = world_state[x][y];
 	if (reg == 0)
 	{
@@ -399,31 +404,31 @@ void ISA::set_reg(int x, int y, int reg, int new_value, CellState*** world_state
 	}
 	else if (reg == LOGO_REG)
 	{
-		current->logo = new_value;
+		current->logo = true_value;
 	}
 	else if (reg == GUESS_REG)
 	{
-		current->guess = new_value;
+		current->guess = true_value;
 	}
 	else if (reg == A_REG)
 	{
-		current->reg_a = new_value;
+		current->reg_a = true_value;
 	}
 	else if (reg == B_REG)
 	{
-		current->reg_b = new_value;
+		current->reg_b = true_value;
 	}
 	else if (reg == C_REG)
 	{
-		current->reg_c = new_value;
+		current->reg_c = true_value;
 	}
 	else if (reg == D_REG)
 	{
-		current->reg_d = new_value;
+		current->reg_d = true_value;
 	}
 	else if (reg == IPLOC_REG)
 	{
-		current->iploc = new_value;
+		current->iploc = true_value;
 	}
 	else if (reg == ENERGY_IREG || reg == LOGO_IREG || reg == GUESS_IREG || reg == A_IREG || reg == B_IREG || reg == C_IREG || reg == D_IREG || reg == IPLOC_IREG)
 	{
