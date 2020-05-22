@@ -7,10 +7,10 @@
 #include <bitset>
 using namespace std;
 const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
-vector<Species*> species_list = vector<Species*>();
-int next_species_id = 1;
+vector<Species*> ISA::species_list = vector<Species*>();
+int ISA::next_species_id = 1;
 
-Species* get_species(int species_id)
+Species* ISA::get_species(int species_id)
 {
 	for (int i = 0; i < species_list.size(); i++)
 	{
@@ -23,7 +23,7 @@ Species* get_species(int species_id)
 	return nullptr;
 }
 
-void delete_species(int species_id)
+void ISA::delete_species(int species_id)
 {
 	for (int i = 0; i < species_list.size(); i++)
 	{

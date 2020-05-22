@@ -61,8 +61,9 @@ class ISA
         static string get_R2_name(int instruction);
         static string get_cell_op_name(int cell_op);
         static string get_reg_op_name(int reg_op);
-
-        
+        static vector<Species*> species_list;
+        static int next_species_id;
+        static void delete_species(int species_id);
         
     public:
         //static void init();
@@ -74,5 +75,9 @@ class ISA
         static int create_instruction(int OP);
         static int create_instruction(int OP, int R, bool cop = false);
         static int create_instruction(int OP, int R1, int R2);
+        static Species* get_species(int species_id);
+        
+
+
 };
 
