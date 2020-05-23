@@ -4,8 +4,8 @@
 class SpeciesTracker
 {
 private:
-	static vector<Species*> species_list;
-	static vector<Species*> extinct_species_list;
+	vector<Species*> species_list;
+	vector<Species*> extinct_species_list;
 	int next_species_id = 0;
 
 public:
@@ -14,6 +14,7 @@ public:
 	int number_of_living_species();
 	int number_of_extinct_species();
 	void prune_extinct_species();
-	void create_new_species_if_needed(CellState* parent_cell, CellState* child_cell, int date);
+	bool create_new_species_if_needed(CellState* parent_cell, CellState* child_cell, int date);
 	void extinction_if_needed(CellState* dead_cell, int date);
+	void print_all_species();
 };

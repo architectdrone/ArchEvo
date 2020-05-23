@@ -3,8 +3,9 @@
 int Viewer::draw_mode = DRAW_LINEAGE;
 int Viewer::size = 0;
 bool Viewer::fast_forward = false;
-void Viewer::draw_cell(int x, int y, CellState* cell)
+void Viewer::draw_cell(int x, int y, WorldState* world)
 {
+	CellState* cell = world->get_cell(x, y);
 	char cell_char;
 	TCODColor cell_color;
 	int lineage = cell->lineage_length;
@@ -27,7 +28,7 @@ void Viewer::draw_cell(int x, int y, CellState* cell)
 			break;
 		case DRAW_SPECIES:
 			
-			cell_species = ISA::get_species(cell->species_id);
+			cell_species = world->species_tracker.get_species(cell->species_id);
 			if (cell_species != nullptr)
 			{
 				cell_color = TCODColor::green;
@@ -49,13 +50,13 @@ void Viewer::draw_cell(int x, int y, CellState* cell)
 	TCODConsole::root->setCharForeground(x, y, cell_color);
 }
 
-void Viewer::draw_background(int x, int y, CellState*** world)
+void Viewer::draw_background(int x, int y, WorldState* world)
 {
-	vector<int> attacking = ISA::is_attacking(x, y, world, size);
-	vector<int> reproducing = ISA::is_reproducing(x, y, world, size);
+	vector<int> attacking = ISA::is_attacking(x, y, world);
+	vector<int> reproducing = ISA::is_reproducing(x, y, world);
 	if (attacking[0] != -1)
 	{
-		if (world[attacking[0]][attacking[1]] != nullptr)
+		if (world->get_cell(attacking[0], attacking[1]) != nullptr)
 		{
 			TCODConsole::root->setCharBackground(attacking[0], attacking[1], TCODColor::red);
 			TCODConsole::root->setCharBackground(x, y, TCODColor::lightRed);
@@ -63,7 +64,7 @@ void Viewer::draw_background(int x, int y, CellState*** world)
 	}
 	else if (reproducing[0] != -1)
 	{
-		if (world[reproducing[0]][reproducing[1]] == nullptr && world[x][y]->energy > INITIAL_ENERGY + 1)
+		if (world->get_cell(reproducing[0], reproducing[1]) == nullptr && world->get_cell(x, y)->energy > INITIAL_ENERGY + 1)
 		{
 			TCODConsole::root->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
 			TCODConsole::root->setCharBackground(x, y, TCODColor::lightGreen);
@@ -78,7 +79,7 @@ void Viewer::init(int _size)
 	draw_mode = DRAW_LINEAGE;
 }
 
-void Viewer::draw(CellState*** world)
+void Viewer::draw(WorldState* world)
 {
 	TCODConsole::root->clear();
 	TCOD_key_t key;
@@ -97,9 +98,9 @@ void Viewer::draw(CellState*** world)
 			for (int y = 0; y < size; y++)
 			{
 
-				if (world[x][y] != nullptr)
+				if (world->get_cell(x, y) != nullptr)
 				{
-					draw_cell(x, y, world[x][y]);
+					draw_cell(x, y, world);
 					draw_background(x, y, world);
 				}
 			}

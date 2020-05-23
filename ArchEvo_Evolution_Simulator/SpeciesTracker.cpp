@@ -1,4 +1,5 @@
 #include "SpeciesTracker.h"
+#include <iostream>
 const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 
 Species* SpeciesTracker::get_species(int species_id)
@@ -75,7 +76,7 @@ void SpeciesTracker::prune_extinct_species()
 	}
 }
 
-void SpeciesTracker::create_new_species_if_needed(CellState* parent_cell, CellState* child_cell, int date)
+bool SpeciesTracker::create_new_species_if_needed(CellState* parent_cell, CellState* child_cell, int date)
 {
 	Species* parent_species = get_species(parent_cell->species_id);
 	if (child_cell->lineage_length > 2) //Only consider cells that have reproduced twice.
@@ -114,8 +115,11 @@ void SpeciesTracker::create_new_species_if_needed(CellState* parent_cell, CellSt
 			new_species->register_birth();
 			species_list.push_back(new_species);
 			child_cell->species_id = new_species->id;
+
+			return true;
 		}
 	}
+	return false;
 }
 
 void SpeciesTracker::extinction_if_needed(CellState* dead_cell, int date)
@@ -147,5 +151,86 @@ void SpeciesTracker::extinction_if_needed(CellState* dead_cell, int date)
 			//Otherwise, we move the species to an extinct list, so the program doesn't need to scan through them anymore.
 			extinct_species_list.push_back(the_species);
 		}
+	}
+}
+
+void SpeciesTracker::print_all_species()
+{
+	vector<Species*> all_species = get_all_species();
+	for (int i = 0; i < all_species.size(); i++)
+	{
+		Species* species = all_species[i];
+		if (species->get_extinction_date() == -1 || (species->all_children().size() != 0))
+		{
+			cout << "----------------------------" << endl;
+
+			cout << "Species: " << species->readable_id << " (" << species->id << ")" << endl;
+			cout << "Lived from " << species->arrival_date << " - ";
+			if (species->get_extinction_date() != -1)
+			{
+				cout << species->get_extinction_date() << " (EXTINCT)" << endl;
+			}
+			else
+			{
+				cout << "PRESENT" << endl;
+			}
+			Species* parent_species = get_species(species->parent_id);
+			if (parent_species != nullptr)
+			{
+				cout << "Parent: " << parent_species->readable_id << " (" << species->parent_id << ")" << endl;
+			}
+			else
+			{
+				cout << "Parent: ROOT" << endl;
+			}
+
+			cout << "Current: " << species->get_alive() << " Total: " << species->get_total_alive() << " Peak: " << species->get_peak_alive() << endl;
+			cout << "Average Age: " << species->average_age() << " Average Verility: " << species->average_virility() << endl;
+			cout << "Children: " << species->all_children().size() << endl;
+			vector<vector<int>> prey = species->all_prey();
+			cout << "Prey: " << endl;
+			int root_count = 0;
+			for (int j = 0; j < prey.size(); j++)
+			{
+				Species* prey_species = get_species(prey[j][0]);
+				if (prey_species != nullptr)
+				{
+					cout << "\t" << prey_species->readable_id << " : " << prey[j][1] << endl;
+				}
+				else
+				{
+					root_count += prey[j][1];
+				}
+			}
+			if (root_count != 0)
+			{
+				cout << "\tROOT: " << root_count << endl;
+			}
+
+			/*
+
+			vector<vector<int>> predators = species->all_predators();
+			cout << "Predators: " << endl;
+			root_count = 0;
+			for (int j = 0; j < predators.size(); j++)
+			{
+				Species* predator_species = get_species(predators[j][0]);
+				if (predator_species != nullptr)
+				{
+					cout << "\t" << predator_species->readable_id << " : " << predators[j][1] << endl;
+				}
+				else
+				{
+					root_count += predators[j][1];
+				}
+			}
+			if (root_count != 0)
+			{
+				cout << "\tROOT: " << root_count << endl;
+			}
+			cout << "-------------------------" << endl;
+			*/
+		}
+
 	}
 }

@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ArchEvoGenUtil.h" />
     <ClInclude Include="CellState.h" />
     <ClInclude Include="SpeciesTracker.h" />
     <ClInclude Include="WorldState.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Viewer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArchEvoGenUtil.cpp" />
     <ClCompile Include="CellState.cpp" />
     <ClCompile Include="ISA.cpp" />
     <ClCompile Include="Main.cpp" />

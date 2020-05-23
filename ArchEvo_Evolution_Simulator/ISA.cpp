@@ -1,117 +1,12 @@
 #include "ISA.h"
 #include "CellState.h"
+#include "ArchEvoGenUtil.h"
 #include <cmath>
 #include <string>
 #include <iostream>
 #include <stdio.h>
 #include <bitset>
 using namespace std;
-const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
-vector<Species*> ISA::species_list = vector<Species*>();
-vector<Species*> ISA::extinct_species_list = vector<Species*>();
-int ISA::next_species_id = 1;
-
-Species* ISA::get_species(int species_id)
-{
-	if (species_id == 0)
-	{
-		return nullptr;
-	}
-	for (int i = 0; i < species_list.size(); i++)
-	{
-		if (species_list[i]->id == species_id)
-		{
-			return species_list[i];
-		}
-	}
-	//Also search extinct species.
-	for (int i = 0; i < extinct_species_list.size(); i++)
-	{
-		if (extinct_species_list[i]->id == species_id)
-		{
-			return extinct_species_list[i];
-		}
-	}
-	//Finally, search for pruned extinct species. Return the parent of the pruned species.
-	for (int i = 0; i < extinct_species_list.size(); i++)
-	{
-		Species* the_species = extinct_species_list[i];
-		vector<int> all_subspecies = the_species->all_children();
-		for (int j = 0; j < all_subspecies.size(); j++)
-		{
-			if (all_subspecies[j] == species_id)
-			{
-				return the_species;
-			}
-		}
-	}
-
-	//Who knows? Probably a flash in the pan species.
-	return nullptr;
-}
-
-vector<Species*> ISA::get_all_species()
-{
-	vector<Species*> to_return = species_list;
-	to_return.insert(to_return.end(), extinct_species_list.begin(), extinct_species_list.end());
-
-	return to_return;
-}
-
-int ISA::number_of_living_species()
-{
-	return species_list.size();
-}
-
-int ISA::number_of_extinct_species()
-{
-	return extinct_species_list.size();
-}
-
-void ISA::prune_extinct_species()
-{
-	//Deletes all evolutionary dead end species, "collapsing" them into the parent species.
-	for (int i = 0; i < extinct_species_list.size(); i++)
-	{
-		Species* the_species = extinct_species_list[i];
-		if ((the_species->all_children()).size() == 0)
-		{
-			Species* parent_species = get_species(the_species->parent_id);
-			parent_species->register_child_species(the_species->id);
-			extinct_species_list.erase(extinct_species_list.begin() + i);
-			delete the_species;
-			i--;
-		}
-	}
-}
-
-
-void ISA::delete_species(int species_id)
-{
-	for (int i = 0; i < species_list.size(); i++)
-	{
-		if (species_list[i]->id == species_id)
-		{
-			delete species_list[i];
-			species_list.erase(species_list.begin()+i);
-			return;
-		}
-	}
-}
-
-/*
-void ISA::init()
-{
-	Species first;
-	first.id = 0;
-	first.readable_id = "";
-	species_list.push_back(first);
-}
-*/
-int true_mod(int n, int m)
-{
-	return (m + (n % m)) % m;
-}
 
 int ISA::iploc_x(int x, int y, int iploc)
 {
@@ -191,18 +86,20 @@ int ISA::get_bit(int byte, int bit_num)
 	return (byte & exp) >> bit_num;
 }
 
-void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, CellState*** world_state)
+void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, WorldState* world)
 {
-	if (world_state[attacker_x][attacker_y] == nullptr)
+	if (world->get_cell(attacker_x, attacker_y) == nullptr)
 	{
 		throw "Empty cell attempts to attack?";
 	}
-	int guess = world_state[attacker_x][attacker_y]->guess;
+	CellState* attacker = world->get_cell(attacker_x, attacker_y);
+	CellState* victim = world->get_cell(victim_x, victim_y);
+	
 	int damage = 0;
-	if (world_state[victim_x][victim_y] != nullptr)
+	if (victim != nullptr)
 	{
-		
-		int logo = world_state[victim_x][victim_y]->logo;
+		int guess = attacker->guess;
+		int logo = victim->logo;
 		//cout << "Cell at " << attacker_x << ", " << attacker_y << " strikes! LOGO: " << bitset<8>(logo) << " GUESS: " << bitset<8>(guess) << endl;
 		int correct_bits = 0;
 		for (int i = 0; i < 8; i++)
@@ -214,11 +111,10 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 				correct_bits++;
 			}
 		}
-		damage = (world_state[victim_x][victim_y]->energy)/(9-correct_bits);
+		damage = (victim->energy)/(9-correct_bits);
 		if (correct_bits == 0)
 		{
 			damage = -5;
-			//damage = 0;
 		}
 	}
 	else
@@ -227,29 +123,31 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 		//damage = 0;
 	}
 	
-	world_state[attacker_x][attacker_y]->energy += damage;
+	attacker->energy += damage;
 	if (damage > 0)
 	{
-		Species* attacker_species = get_species(world_state[attacker_x][attacker_y]->species_id);
-		Species* victim_species = get_species(world_state[victim_x][victim_y]->species_id);
+		Species* attacker_species = world->species_tracker.get_species(attacker->species_id);
+		Species* victim_species = world->species_tracker.get_species(victim->species_id);
 		if (attacker_species != nullptr)
 		{
-			attacker_species->register_eating(world_state[victim_x][victim_y]->species_id, damage);
+			attacker_species->register_eating(victim->species_id, damage);
 		}
 		if (victim_species != nullptr)
 		{
-			victim_species->register_being_eaten(world_state[attacker_x][attacker_y]->species_id, damage);
+			victim_species->register_being_eaten(attacker->species_id, damage);
 		}
-		world_state[victim_x][victim_y]->energy -= damage;
+		victim->energy -= damage;
 	}
 }
 
-bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellState*** world_state, int date)
+bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, WorldState* world)
 {
-	if ((world_state[parent_x][parent_y]->energy > INITIAL_ENERGY+1) && (world_state[child_x][child_y] == nullptr))
+	CellState* parent = world->get_cell(parent_x, parent_y);
+	CellState* child = world->get_cell(child_x, child_y);
+	if ((parent->energy > INITIAL_ENERGY+1) && (child == nullptr))
 	{
 		//cout << "Cell has successfully reproduced. ";
-		if (world_state[parent_x][parent_y]->lineage_length == 0)
+		if (parent->lineage_length == 0)
 		{
 			//cout << "Ex Nihilo" << endl;
 		}
@@ -257,54 +155,28 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 		{
 			//cout << "CHILD OF CHILD!" << endl;
 		}
-		world_state[parent_x][parent_y]->energy -= INITIAL_ENERGY; //Deduct required energy
-		world_state[parent_x][parent_y]->virility += 1;
-		world_state[child_x][child_y] = new CellState();
-		world_state[child_x][child_y]->make_child(*world_state[parent_x][parent_y]);
-		world_state[child_x][child_y]->energy = INITIAL_ENERGY;
+		parent->energy -= INITIAL_ENERGY; //Deduct required energy
+		parent->virility += 1;
+		child = new CellState();
+		child->make_child(*parent);
+		child->energy = INITIAL_ENERGY;
+		world->place_cell(child_x, child_y, child);
 
-		Species* parent_species = get_species(world_state[parent_x][parent_y]->species_id);
-		CellState* child = world_state[child_x][child_y];
-		if (child->lineage_length > 2)
+		Species* parent_species = world->species_tracker.get_species(parent->species_id);
+		if (parent_species != nullptr)
 		{
-			if (parent_species != 0 && parent_species->tolerable_difference(child))
-			{
-				//Member of species_list.
-				parent_species->register_birth();
-				child->species_id = parent_species->id;
-			}
-			else
-			{
-				//New species_list
-				Species* new_species = new Species();
-				new_species->arrival_date = date;
-				new_species->id = next_species_id++;
-				
-				for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
-				{
-					new_species->genome[gene] = child->genes[gene];
-				}
-
-				string original_name = "";
-				if (parent_species != nullptr)
-				{
-					original_name = parent_species->readable_id;
-					new_species->parent_id = parent_species->id;
-					parent_species->register_child_species(new_species->id);
-				}
-				else
-				{
-					original_name = "";
-					new_species->parent_id = 0;
-				}
-				
-				new_species->readable_id = original_name + letters[rand() % 26];
-				new_species->register_birth();
-				species_list.push_back(new_species);
-				child->species_id = new_species->id;
-			}
+			child->species_id = parent_species->id;
+		}
+		else
+		{
+			child->species_id = 0;
 		}
 		
+		bool new_species = world->species_tracker.create_new_species_if_needed(parent, child, world->get_iteration());
+		if (!new_species && parent_species != nullptr)
+		{
+			parent_species->register_birth();
+		}
 		return true;
 		
 	}
@@ -314,7 +186,7 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, CellSt
 	}
 }
 
-int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
+int ISA::find(int x, int y, WorldState* world, int initial_ip)
 {
 	/*
 	Returns the location of the next closest template match from initial_ip. 
@@ -328,7 +200,7 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 	int current_template_length = 0;
 	int current_template_score = 0;
 	int initial_template_length = 0;
-	CellState* current_cell = world_state[x][y];
+	CellState* current_cell = world->get_cell(x, y);
 	while (current_ip != initial_ip)
 	{
 		int current_op = get_OP(current_cell->genes[current_ip]);
@@ -406,9 +278,9 @@ int ISA::find(int x, int y, CellState*** world_state, int initial_ip)
 	return best_template_start;
 }
 
-void ISA::execute(int x, int y, CellState*** world_state, int world_size, int date)
+void ISA::execute(int x, int y, WorldState* world)
 {
-	CellState* current = world_state[x][y];
+	CellState* current = world->get_cell(x, y);
 	if (current == nullptr)
 	{
 		return;
@@ -418,42 +290,13 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size, int da
 	//Kill cell if energy is gone.
 	if (current->energy <= 0)
 	{
-		Species* the_species = nullptr;
-		int species_pos = -1;
-		for (int i = 0; i < species_list.size(); i++)
-		{
-			if (species_list[i]->id == current->species_id)
-			{
-				the_species = species_list[i];
-				species_pos = i;
-			}
-		}
-		
+		Species* the_species = world->species_tracker.get_species(current->species_id);
 		if (the_species != nullptr)
 		{
-			the_species->register_dying(current, date);
-			if (the_species->get_alive() == 0)
-			{
-				//Extinction
-				species_list.erase(species_list.begin() + species_pos); //Remove it from the species list.
-				if ((the_species->get_total_alive() == 1) || (the_species->parent_id == 0 && the_species->all_children().size() == 0))
-				{
-					//We consider irrelevant all "flash in the pan" species. These species
-					//1. Only ever had one member
-					//2. Were a child of root and had no sub species.
-					delete the_species;
-				}
-				else
-				{
-					//Otherwise, we move the species to an extinct list, so the program doesn't need to scan through them anymore.
-					extinct_species_list.push_back(the_species);
-				}
-			}
+			the_species->register_dying(current, world->get_iteration());
+			world->species_tracker.extinction_if_needed(current, world->get_iteration());
 		}
-		
-
-		delete world_state[x][y];
-		world_state[x][y] = nullptr;
+		world->delete_cell(x, y);
 		return;
 	}
 	
@@ -467,39 +310,37 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size, int da
 	int op = get_OP(instruction);
 
 	//Values of the registers
-	int R1_value = get_reg(x, y, R1, world_state, world_size);
-	int R2_value = get_reg(x, y, R2, world_state, world_size);
+	int R1_value = get_reg(x, y, R1, world);
+	int R2_value = get_reg(x, y, R2, world);
 
 	//IPLOC values
-	int target_x = true_mod(iploc_x(x, y, current->iploc),world_size);
-	int target_y = true_mod(iploc_y(x, y, current->iploc), world_size);
+	int target_x = iploc_x(x, y, current->iploc);
+	int target_y = iploc_y(x, y, current->iploc);
 
 	if (R1 == ENERGY_REG || (R1 > IPLOC_REG))
 	{
 		//Cell Operations
 		if (op == DIV_COP)
 		{
-			reproduce(x, y, target_x, target_y, world_state, date);
+			reproduce(x, y, target_x, target_y, world);
 			
 		}
 		else if (op == JMP_COP)
 		{
-			current->ip = find(x, y, world_state, current->ip);
+			current->ip = find(x, y, world, current->ip);
 			//cout << "Jumping forward to " << current->ip << endl;
 		}
 		else if (op == JPC_COP)
 		{
 			if (R2_value == 0xFF)
 			{
-				current->ip = find(x, y, world_state, current->ip);
+				current->ip = find(x, y, world, current->ip);
 			}
 		}
 		else if (op == MOV_COP)
 		{
 			//Move
-			CellState* temp = world_state[x][y];
-			world_state[x][y] = world_state[target_x][target_y];
-			world_state[target_x][target_y] = temp;
+			world->swap_cells(x, y, target_x, target_y);
 		}
 		else if (op == IGN_COP)
 		{
@@ -515,7 +356,7 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size, int da
 		}
 		else if (op == ATK_COP)
 		{
-			attack(x, y, target_x, target_y, world_state);
+			attack(x, y, target_x, target_y, world);
 		}
 	}
 	else
@@ -574,14 +415,14 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size, int da
 				new_R1 = 0x00;
 			}
 		}
-		set_reg(x, y, R1, new_R1, world_state, world_size);
+		set_reg(x, y, R1, new_R1, world);
 	}
 }
 
-void ISA::set_reg(int x, int y, int reg, int new_value, CellState*** world_state, int world_size)
+void ISA::set_reg(int x, int y, int reg, int new_value, WorldState* world)
 {
-	int true_value = true_mod(new_value, 0b11111111);
-	CellState* current = world_state[x][y];
+	int true_value = ArchEvoGenUtil::true_mod(new_value, 0b11111111);
+	CellState* current = world->get_cell(x, y);
 	if (reg == 0)
 	{
 		throw "Cannot Set Energy Directly!";
@@ -624,10 +465,9 @@ void ISA::set_reg(int x, int y, int reg, int new_value, CellState*** world_state
 	}
 }
 
-int ISA::get_reg(int x, int y, int reg, CellState*** world_state, int world_size)
+int ISA::get_reg(int x, int y, int reg, WorldState* world)
 {
-	CellState* current = world_state[x][y];
-	CellState* iploc_cell = world_state[true_mod(iploc_x(x, y, current->iploc), world_size)][true_mod(iploc_y(x, y, current->iploc), world_size)];
+	CellState* current = world->get_cell(x, y);
 	if (reg == ENERGY_REG)
 	{
 		return current->energy;
@@ -662,13 +502,13 @@ int ISA::get_reg(int x, int y, int reg, CellState*** world_state, int world_size
 	}
 	else if (reg == ENERGY_IREG ||reg == LOGO_IREG ||reg == GUESS_IREG ||reg == A_IREG ||reg == B_IREG ||reg == C_IREG ||reg == D_IREG  ||reg == IPLOC_IREG)
 	{
-		int new_x = true_mod(iploc_x(x, y, current->iploc),  world_size);
-		int new_y = true_mod(iploc_y(x, y, current->iploc),  world_size);
-		if ((world_state[new_x][new_y]) == nullptr)
+		int new_x = iploc_x(x, y, current->iploc);
+		int new_y = iploc_y(x, y, current->iploc);
+		if (world->get_cell(new_x, new_y) == nullptr)
 		{
 			return 0;
 		}
-		return get_reg(new_x, new_y, reg - 8, world_state, world_size);
+		return get_reg(new_x, new_y, reg - 8, world);
 	}
 	else
 	{
@@ -906,100 +746,19 @@ void ISA::print_genome(CellState* cell)
 	}
 }
 
-void ISA::print_all_species()
-{
-	vector<Species*> all_species = get_all_species();
-	for (int i = 0; i < all_species.size(); i++)
-	{
-		Species* species = all_species[i];
-		if (species->get_extinction_date() == -1 || (species->all_children().size() != 0))
-		{
-			cout << "----------------------------" << endl;
-
-			cout << "Species: " << species->readable_id << " (" << species->id << ")" << endl;
-			cout << "Lived from " << species->arrival_date << " - ";
-			if (species->get_extinction_date() != -1)
-			{
-				cout << species->get_extinction_date() << " (EXTINCT)" << endl;
-			}
-			else
-			{
-				cout << "PRESENT" << endl;
-			}
-			Species* parent_species = get_species(species->parent_id);
-			if (parent_species != nullptr)
-			{
-				cout << "Parent: " << parent_species->readable_id << " (" << species->parent_id << ")" << endl;
-			}
-			else
-			{
-				cout << "Parent: ROOT" << endl;
-			}
-			
-			cout << "Current: " << species->get_alive() << " Total: " << species->get_total_alive() << " Peak: " << species->get_peak_alive() << endl;
-			cout << "Average Age: " << species->average_age() << " Average Verility: " << species->average_virility() << endl;
-			cout << "Children: " << species->all_children().size() << endl;
-			vector<vector<int>> prey = species->all_prey();
-			cout << "Prey: " << endl;
-			int root_count = 0;
-			for (int j = 0; j < prey.size(); j++)
-			{
-				Species* prey_species = get_species(prey[j][0]);
-				if (prey_species != nullptr)
-				{
-					cout << "\t" << prey_species->readable_id << " : " << prey[j][1] << endl;
-				}
-				else
-				{
-					root_count += prey[j][1];
-				}
-			}
-			if (root_count != 0)
-			{
-				cout << "\tROOT: " << root_count << endl;
-			}
-
-			/*
-			
-			vector<vector<int>> predators = species->all_predators();
-			cout << "Predators: " << endl;
-			root_count = 0;
-			for (int j = 0; j < predators.size(); j++)
-			{
-				Species* predator_species = get_species(predators[j][0]);
-				if (predator_species != nullptr)
-				{
-					cout << "\t" << predator_species->readable_id << " : " << predators[j][1] << endl;
-				}
-				else
-				{
-					root_count += predators[j][1];
-				}
-			}
-			if (root_count != 0)
-			{
-				cout << "\tROOT: " << root_count << endl;
-			}
-			cout << "-------------------------" << endl;
-			*/
-		}
-
-	}
-}
-
-vector<int> ISA::is_reproducing(int x, int y, CellState*** world, int size)
+vector<int> ISA::is_reproducing(int x, int y, WorldState* world)
 {
 	vector<int> to_return(2, -1);
-	if (world[x][y] == nullptr)
+	CellState* cell = world->get_cell(x, y);
+	if (cell == nullptr)
 	{
 		return to_return;
 	}
-	CellState* cell = world[x][y];
 	int instruction = cell->genes[cell->ip];
 	if (is_COP(instruction) && get_OP(instruction) == DIV_COP)
 	{
-		to_return[0] = true_mod(iploc_x(x, y, cell->iploc), size);
-		to_return[1] = true_mod(iploc_y(x, y, cell->iploc), size);
+		to_return[0] = iploc_x(x, y, cell->iploc);
+		to_return[1] = iploc_y(x, y, cell->iploc);
 		return to_return;
 	}
 	else
@@ -1008,19 +767,19 @@ vector<int> ISA::is_reproducing(int x, int y, CellState*** world, int size)
 	}
 }
 
-vector<int> ISA::is_attacking(int x, int y, CellState*** world, int size)
+vector<int> ISA::is_attacking(int x, int y, WorldState* world)
 {
 	vector<int> to_return(2, -1);
-	if (world[x][y] == nullptr)
+	CellState* cell = world->get_cell(x, y);
+	if (cell == nullptr)
 	{
 		return to_return;
 	}
-	CellState* cell = world[x][y];
 	int instruction = cell->genes[cell->ip];
 	if (is_COP(instruction) && get_OP(instruction) == ATK_COP)
 	{
-		to_return[0] = true_mod(iploc_x(x, y, cell->iploc), size);
-		to_return[1] = true_mod(iploc_y(x, y, cell->iploc), size);
+		to_return[0] = iploc_x(x, y, cell->iploc);
+		to_return[1] = iploc_y(x, y, cell->iploc);
 		return to_return;
 	}
 	else

@@ -33,6 +33,9 @@
     <ClInclude Include="SpeciesTracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ArchEvoGenUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ISA.cpp">
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SpeciesTracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchEvoGenUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
