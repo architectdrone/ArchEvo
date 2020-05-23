@@ -2,6 +2,15 @@
 #include <iostream>
 const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 
+SpeciesTracker::~SpeciesTracker()
+{
+	vector<Species*> all_species = get_all_species();
+	for (int i = 0; i < all_species.size(); i++)
+	{
+		delete all_species[i];
+	}
+}
+
 Species* SpeciesTracker::get_species(int species_id)
 {
 	if (species_id == 0)

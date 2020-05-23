@@ -9,6 +9,7 @@ private:
 	int next_species_id = 0;
 
 public:
+	~SpeciesTracker();
 	Species* get_species(int species_id);
 	vector<Species*> get_all_species();
 	int number_of_living_species();

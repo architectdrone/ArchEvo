@@ -8,10 +8,11 @@ void WorldState::new_tilde()
 	int random_x = rand() % (size);
 	int random_y = rand() % (size);
 
-	if (world[random_x][random_y] == nullptr)
+	if (get_cell(random_x, random_y) == nullptr)
 	{
-		world[random_x][random_y] = new CellState();
-		world[random_x][random_y]->make_random();
+		CellState* the_cell = new CellState();
+		the_cell->make_random();
+		place_cell(random_x, random_y, the_cell);
 	}
 }
 
@@ -30,6 +31,19 @@ WorldState::WorldState(int _size, int _pruning_rate, int _influx_rate)
 			world[x][y] = nullptr;
 		}
 	}
+}
+
+WorldState::~WorldState()
+{
+	for (int x = 0; x < size; x++)
+	{
+		for (int y = 0; y < size; y++)
+		{
+			delete world[x][y];
+		}
+		delete world[x];
+	}
+	delete world;
 }
 
 void WorldState::update()
@@ -68,6 +82,10 @@ void WorldState::place_cell(int x, int y, CellState* cell)
 {
 	int true_x = ArchEvoGenUtil::true_mod(x, size);
 	int true_y = ArchEvoGenUtil::true_mod(y, size);
+	if (get_cell(true_x, true_y) != nullptr)
+	{
+		throw "Attempting to overwrite a filled cell, this will cause memory leaks!";
+	}
 	world[true_x][true_y] = cell;
 }
 

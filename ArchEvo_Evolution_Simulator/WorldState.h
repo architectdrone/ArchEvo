@@ -13,6 +13,7 @@ private:
 
 public:
 	WorldState(int _size, int _pruning_rate, int _influx_rate);
+	~WorldState();
 	CellState*** world;
 
 	void update();
