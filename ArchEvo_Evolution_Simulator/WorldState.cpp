@@ -1,7 +1,10 @@
 #include "WorldState.h"
 #include "ISA.h"
 #include <stdlib.h>
-
+int true_mod(int n, int m)
+{
+	return (m + (n % m)) % m;
+}
 void WorldState::new_tilde()
 {
 	int random_x = rand() % (size);
@@ -52,6 +55,24 @@ void WorldState::update()
 		{
 			ISA::execute(x, y, world, size, iteration);
 		}
+	}
+}
+
+CellState* WorldState::get_cell(int x, int y)
+{
+	int true_x = true_mod(x, size);
+	int true_y = true_mod(y, size);
+	return world[true_x][true_y];
+}
+
+CellState* WorldState::delete_cell(int x, int y)
+{
+	int true_x = true_mod(x, size);
+	int true_y = true_mod(y, size);
+	if (world[true_x][true_y] != nullptr)
+	{
+		delete world[true_x][true_y];
+		world[true_x][true_y] = nullptr;
 	}
 }
 

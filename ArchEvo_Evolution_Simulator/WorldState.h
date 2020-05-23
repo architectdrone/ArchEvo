@@ -14,6 +14,8 @@ public:
 	CellState*** world;
 
 	void update();
+	CellState* get_cell(int x, int y);
+	CellState* delete_cell(int x, int y);
 
 	int get_size();
 	int get_iteration();
