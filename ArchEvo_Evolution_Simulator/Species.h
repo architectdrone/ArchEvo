@@ -3,7 +3,7 @@
 #include <string>
 #include "CellState.h"
 
-#define TOLERABLE_DIFFERENCE_AMOUNT 0.01 //If a genome differs by greater than this percent from the species genome, they are different species.
+#define TOLERABLE_DIFFERENCE_AMOUNT 0.1 //If a genome differs by greater than this percent from the species genome, they are different species.
 
 using namespace std;
 class Species

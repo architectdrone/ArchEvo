@@ -8,11 +8,24 @@
 using namespace std;
 const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 vector<Species*> ISA::species_list = vector<Species*>();
+vector<Species*> ISA::extinct_species_list = vector<Species*>();
 int ISA::next_species_id = 1;
 
 Species* ISA::get_species(int species_id)
 {
+	if (species_id == 0)
+	{
+		return nullptr;
+	}
 	for (int i = 0; i < species_list.size(); i++)
+	{
+		if (species_list[i]->id == species_id)
+		{
+			return species_list[i];
+		}
+	}
+	//Also search extinct species.
+	for (int i = 0; i < extinct_species_list.size(); i++)
 	{
 		if (species_list[i]->id == species_id)
 		{
@@ -21,6 +34,24 @@ Species* ISA::get_species(int species_id)
 	}
 
 	return nullptr;
+}
+
+vector<Species*> ISA::get_all_species()
+{
+	vector<Species*> to_return = species_list;
+	to_return.insert(to_return.end(), extinct_species_list.begin(), extinct_species_list.end());
+
+	return to_return;
+}
+
+int ISA::number_of_living_species()
+{
+	return species_list.size();
+}
+
+int ISA::number_of_extinct_species()
+{
+	return extinct_species_list.size();
 }
 
 void ISA::delete_species(int species_id)
@@ -354,13 +385,36 @@ void ISA::execute(int x, int y, CellState*** world_state, int world_size, int da
 	//Kill cell if energy is gone.
 	if (current->energy <= 0)
 	{
-		Species* the_species = get_species(current->species_id);
+		Species* the_species = nullptr;
+		int species_pos = -1;
+		for (int i = 0; i < species_list.size(); i++)
+		{
+			if (species_list[i]->id == current->species_id)
+			{
+				the_species = species_list[i];
+				species_pos = i;
+			}
+		}
+		
 		if (the_species != nullptr)
 		{
 			the_species->register_dying(current, date);
-			if (the_species->get_alive() == 0 && (the_species->get_total_alive() == 1 || (the_species->parent_id == 0 && the_species->all_children().size() == 0)))
+			if (the_species->get_alive() == 0)
 			{
-				delete_species(current->species_id);
+				//Extinction
+				species_list.erase(species_list.begin() + species_pos); //Remove it from the species list.
+				if ((the_species->get_total_alive() == 1) || (the_species->parent_id == 0 && the_species->all_children().size() == 0))
+				{
+					//We consider irrelevant all "flash in the pan" species. These species
+					//1. Only ever had one member
+					//2. Were a child of root and had no sub species.
+					delete the_species;
+				}
+				else
+				{
+					//Otherwise, we move the species to an extinct list, so the program doesn't need to scan through them anymore.
+					extinct_species_list.push_back(the_species);
+				}
 			}
 		}
 		
@@ -821,10 +875,11 @@ void ISA::print_genome(CellState* cell)
 
 void ISA::print_all_species()
 {
-	for (int i = 0; i < species_list.size(); i++)
+	vector<Species*> all_species = get_all_species();
+	for (int i = 0; i < all_species.size(); i++)
 	{
-		Species* species = species_list[i];
-		if (species->get_total_alive() > 1 && (species->parent_id != 0 || species->all_children().size() > 0))
+		Species* species = all_species[i];
+		if (species->get_extinction_date() == -1 || (species->all_children().size() != 0))
 		{
 			cout << "----------------------------" << endl;
 

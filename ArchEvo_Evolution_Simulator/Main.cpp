@@ -24,7 +24,7 @@ int main()
 	//ISA::init();
 	//Main Loop
 	int iterations = 0;
-	const int print_rate = 100000;
+	const int print_rate = 10000000;
 	while (true)
 	{
 		
@@ -91,7 +91,7 @@ int main()
 			int num;
 			cin >> num;
 		}
-		cout << "Iteration " << iterations << " O: " << organism_count << " V: " << valid_organism_count << endl;
+		cout << "Iteration " << iterations << " S: " << ISA::number_of_living_species() << " E: " << ISA::number_of_extinct_species() << endl;
 	}
 	
 }
