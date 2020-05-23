@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CellState.h" />
+    <ClInclude Include="SpeciesTracker.h" />
     <ClInclude Include="WorldState.h" />
     <ClInclude Include="Species.h" />
     <ClInclude Include="ISA.h" />
@@ -153,6 +154,7 @@
     <ClCompile Include="ISA.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Species.cpp" />
+    <ClCompile Include="SpeciesTracker.cpp" />
     <ClCompile Include="Viewer.cpp" />
     <ClCompile Include="WorldState.cpp" />
   </ItemGroup>
