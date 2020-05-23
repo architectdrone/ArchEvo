@@ -24,8 +24,8 @@ private:
 	int extinction_date = -1; //Date that the species went extinct (if ever)
 public:
 	void register_birth();
-	void register_eating(int prey_species);
-	void register_being_eaten(int predator_species);
+	void register_eating(int prey_species, int damage);
+	void register_being_eaten(int predator_species, int damage);
 	void register_dying(CellState* dying_cell, int date);
 	void register_child_species(int id);
 

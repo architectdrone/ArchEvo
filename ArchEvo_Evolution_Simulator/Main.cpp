@@ -24,7 +24,7 @@ int main()
 	//ISA::init();
 	//Main Loop
 	int iterations = 0;
-	const int print_rate = 100000;
+	const int print_rate = 10000;
 	const int prune_rate = 10000;
 	while (true)
 	{

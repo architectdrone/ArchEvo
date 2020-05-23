@@ -234,11 +234,11 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 		Species* victim_species = get_species(world_state[victim_x][victim_y]->species_id);
 		if (attacker_species != nullptr)
 		{
-			attacker_species->register_eating(world_state[victim_x][victim_y]->species_id);
+			attacker_species->register_eating(world_state[victim_x][victim_y]->species_id, damage);
 		}
 		if (victim_species != nullptr)
 		{
-			victim_species->register_being_eaten(world_state[attacker_x][attacker_y]->species_id);
+			victim_species->register_being_eaten(world_state[attacker_x][attacker_y]->species_id, damage);
 		}
 		world_state[victim_x][victim_y]->energy -= damage;
 	}

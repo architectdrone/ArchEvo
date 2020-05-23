@@ -4,14 +4,14 @@
 #include "ISA.h"
 using namespace std;
 
-vector<int> extend_and_increment(vector<int> input, int index)
+vector<int> extend_and_increment(vector<int> input, int index, int amount = 1)
 {
 	if (index >= input.size())
 	{
 		input.resize(index+1);
 		input[index] = 0;
 	}
-	input[index] += 1;
+	input[index] += amount;
 	return input;
 }
 
@@ -55,14 +55,14 @@ void Species::register_birth()
 	}
 }
 
-void Species::register_eating(int prey_species)
+void Species::register_eating(int prey_species, int damage)
 {
-	prey = extend_and_increment(prey, prey_species);
+	prey = extend_and_increment(prey, prey_species, damage);
 }
 
-void Species::register_being_eaten(int predator_species)
+void Species::register_being_eaten(int predator_species, int damage)
 {
-	predators = extend_and_increment(predators, predator_species);
+	predators = extend_and_increment(predators, predator_species, damage);
 }
 
 void Species::register_dying(CellState* dying_cell, int date)
