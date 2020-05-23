@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-	const int size = 25;
+	const int size = 20;
 	CellState*** world = new CellState**[size];
 	for (int x = 0; x < size; x++)
 	{
@@ -24,7 +24,8 @@ int main()
 	//ISA::init();
 	//Main Loop
 	int iterations = 0;
-	const int print_rate = 10000000;
+	const int print_rate = 100000;
+	const int prune_rate = 10000;
 	while (true)
 	{
 		
@@ -41,6 +42,12 @@ int main()
 		iterations++;		
 		
 		bool print_time = iterations % print_rate == 0;
+
+		if (iterations % prune_rate == 0)
+		{
+			cout << "Pruning..." << endl;
+			ISA::prune_extinct_species();
+		}
 
 		int organism_count = 0;
 		int valid_organism_count = 0;

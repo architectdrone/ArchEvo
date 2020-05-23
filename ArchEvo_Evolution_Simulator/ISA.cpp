@@ -27,12 +27,26 @@ Species* ISA::get_species(int species_id)
 	//Also search extinct species.
 	for (int i = 0; i < extinct_species_list.size(); i++)
 	{
-		if (species_list[i]->id == species_id)
+		if (extinct_species_list[i]->id == species_id)
 		{
-			return species_list[i];
+			return extinct_species_list[i];
+		}
+	}
+	//Finally, search for pruned extinct species. Return the parent of the pruned species.
+	for (int i = 0; i < extinct_species_list.size(); i++)
+	{
+		Species* the_species = extinct_species_list[i];
+		vector<int> all_subspecies = the_species->all_children();
+		for (int j = 0; j < all_subspecies.size(); j++)
+		{
+			if (all_subspecies[j] == species_id)
+			{
+				return the_species;
+			}
 		}
 	}
 
+	//Who knows? Probably a flash in the pan species.
 	return nullptr;
 }
 
@@ -52,6 +66,23 @@ int ISA::number_of_living_species()
 int ISA::number_of_extinct_species()
 {
 	return extinct_species_list.size();
+}
+
+void ISA::prune_extinct_species()
+{
+	//Deletes all evolutionary dead end species, "collapsing" them into the parent species.
+	for (int i = 0; i < extinct_species_list.size(); i++)
+	{
+		Species* the_species = extinct_species_list[i];
+		if ((the_species->all_children()).size() == 0)
+		{
+			Species* parent_species = get_species(the_species->parent_id);
+			parent_species->register_child_species(the_species->id);
+			extinct_species_list.erase(extinct_species_list.begin() + i);
+			delete the_species;
+			i--;
+		}
+	}
 }
 
 
@@ -184,15 +215,16 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Cel
 			}
 		}
 		damage = (world_state[victim_x][victim_y]->energy)/(9-correct_bits);
-		//On perfect guess, do critical damage.
 		if (correct_bits == 0)
 		{
 			damage = -5;
+			//damage = 0;
 		}
 	}
 	else
 	{
 		damage = -4;
+		//damage = 0;
 	}
 	
 	world_state[attacker_x][attacker_y]->energy += damage;
