@@ -8,13 +8,12 @@ using namespace std;
 
 int main()
 {
-	WorldState* world = new WorldState(20, 10000, 3);
-	Viewer::init(20);
+	int size = 50;
+	WorldState* world = new WorldState(size, 10000, 3);
+	Viewer::init(size);
 	Viewer::draw_mode = DRAW_SPECIES;
-	int i = 0;
-	while (i < 100)
+	while (true)
 	{
-		i++;
 		world->update();
 		Viewer::draw(world);
 		cout << "Iteration: " << world->get_iteration() << " S: " << world->species_tracker.number_of_living_species() << " E: " << world->species_tracker.number_of_extinct_species() << endl;
