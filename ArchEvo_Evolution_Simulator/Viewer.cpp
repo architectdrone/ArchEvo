@@ -49,6 +49,28 @@ void Viewer::draw_cell(int x, int y, CellState* cell)
 	TCODConsole::root->setCharForeground(x, y, cell_color);
 }
 
+void Viewer::draw_background(int x, int y, CellState*** world)
+{
+	vector<int> attacking = ISA::is_attacking(x, y, world, size);
+	vector<int> reproducing = ISA::is_reproducing(x, y, world, size);
+	if (attacking[0] != -1)
+	{
+		if (world[attacking[0]][attacking[1]] != nullptr)
+		{
+			TCODConsole::root->setCharBackground(attacking[0], attacking[1], TCODColor::red);
+			TCODConsole::root->setCharBackground(x, y, TCODColor::lightRed);
+		}
+	}
+	else if (reproducing[0] != -1)
+	{
+		if (world[reproducing[0]][reproducing[1]] == nullptr && world[x][y]->energy > INITIAL_ENERGY + 1)
+		{
+			TCODConsole::root->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
+			TCODConsole::root->setCharBackground(x, y, TCODColor::lightGreen);
+		}
+	}
+}
+
 void Viewer::init(int _size)
 {
 	TCODConsole::initRoot(_size, _size, "ArchEvo Viewer", false);
@@ -78,6 +100,7 @@ void Viewer::draw(CellState*** world)
 				if (world[x][y] != nullptr)
 				{
 					draw_cell(x, y, world[x][y]);
+					draw_background(x, y, world);
 				}
 			}
 		}

@@ -54,6 +54,7 @@ int ISA::number_of_extinct_species()
 	return extinct_species_list.size();
 }
 
+
 void ISA::delete_species(int species_id)
 {
 	for (int i = 0; i < species_list.size(); i++)
@@ -951,5 +952,47 @@ void ISA::print_all_species()
 			*/
 		}
 
+	}
+}
+
+vector<int> ISA::is_reproducing(int x, int y, CellState*** world, int size)
+{
+	vector<int> to_return(2, -1);
+	if (world[x][y] == nullptr)
+	{
+		return to_return;
+	}
+	CellState* cell = world[x][y];
+	int instruction = cell->genes[cell->ip];
+	if (is_COP(instruction) && get_OP(instruction) == DIV_COP)
+	{
+		to_return[0] = true_mod(iploc_x(x, y, cell->iploc), size);
+		to_return[1] = true_mod(iploc_y(x, y, cell->iploc), size);
+		return to_return;
+	}
+	else
+	{
+		return to_return;
+	}
+}
+
+vector<int> ISA::is_attacking(int x, int y, CellState*** world, int size)
+{
+	vector<int> to_return(2, -1);
+	if (world[x][y] == nullptr)
+	{
+		return to_return;
+	}
+	CellState* cell = world[x][y];
+	int instruction = cell->genes[cell->ip];
+	if (is_COP(instruction) && get_OP(instruction) == ATK_COP)
+	{
+		to_return[0] = true_mod(iploc_x(x, y, cell->iploc), size);
+		to_return[1] = true_mod(iploc_y(x, y, cell->iploc), size);
+		return to_return;
+	}
+	else
+	{
+		return to_return;
 	}
 }

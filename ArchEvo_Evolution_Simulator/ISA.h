@@ -80,8 +80,8 @@ class ISA
         static vector<Species*> get_all_species();
         static int number_of_living_species();
         static int number_of_extinct_species();
-        
 
-
+        static vector<int> is_reproducing(int x, int y, CellState*** world, int size);
+        static vector<int> is_attacking(int x, int y, CellState*** world, int size);
 };
 
