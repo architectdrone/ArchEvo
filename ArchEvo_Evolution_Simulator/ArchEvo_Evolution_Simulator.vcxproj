@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CellState.h" />
+    <ClInclude Include="WorldState.h" />
     <ClInclude Include="Species.h" />
     <ClInclude Include="ISA.h" />
     <ClInclude Include="Viewer.h" />
@@ -153,6 +154,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Species.cpp" />
     <ClCompile Include="Viewer.cpp" />
+    <ClCompile Include="WorldState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
