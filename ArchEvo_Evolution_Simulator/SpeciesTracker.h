@@ -14,6 +14,8 @@ private:
 public:
 	~SpeciesTracker();
 	Species* get_species(int species_id, bool ensure_sorted = true);
+	Species* get_species_rank(int rank);
+	Species* get_species_rank_extinct(int rank);
 	vector<Species*> get_all_species();
 	int number_of_living_species();
 	int number_of_extinct_species();

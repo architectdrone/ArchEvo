@@ -87,6 +87,33 @@ Species* SpeciesTracker::get_species(int species_id, bool ensure_sorted)
 	return nullptr;
 }
 
+Species* SpeciesTracker::get_species_rank(int rank)
+{
+	//We assume vectors are pre sorted.
+	if (rank < species_list.size())
+	{
+		return species_list[rank];
+	}
+	else
+	{
+		return nullptr;
+	}
+	
+}
+
+Species* SpeciesTracker::get_species_rank_extinct(int rank)
+{
+	if (rank < extinct_species_list.size())
+	{
+		return extinct_species_list[rank];
+	}
+	else
+	{
+		return nullptr;
+	}
+
+}
+
 vector<Species*> SpeciesTracker::get_all_species()
 {
 	vector<Species*> to_return = species_list;

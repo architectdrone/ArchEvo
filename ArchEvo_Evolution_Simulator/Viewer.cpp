@@ -8,7 +8,7 @@ int Viewer::speed = SPEED_REAL_TIME;
 bool Viewer::highlights = true;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
 TCODConsole* Viewer::status_bar = new TCODConsole(MAIN_WINDOW_W, 2);
-
+TCODConsole* Viewer::species_scoreboard = new TCODConsole(SPECIES_SCOREBOARD_W, SPECIES_SCOREBOARD_H);
 void Viewer::draw_cell(int x, int y, WorldState* world)
 {
 	CellState* cell = world->get_cell(x, y);
@@ -42,17 +42,8 @@ void Viewer::draw_cell(int x, int y, WorldState* world)
 		case DRAW_SPECIES:
 			
 			cell_species = world->species_tracker.get_species(cell->species_id);
-			if (cell_species != nullptr)
-			{
-				cell_color = TCODColor::green;
-				cell_color.setHue(((float)((char)(cell_species->readable_id[0]) - 'a') / 26.0f) * 360);
-				cell_char = cell_species->readable_id.back();
-			}
-			else
-			{
-				cell_color = TCODColor::white;
-				cell_char = '~';
-			}
+			cell_color = get_species_color(cell_species);
+			cell_char = get_species_char(cell_species);
 			break;
 			
 		default:
@@ -156,6 +147,83 @@ void Viewer::update_status(WorldState* world)
 	
 }
 
+void Viewer::update_species_scoreboard(WorldState* world)
+{
+	species_scoreboard->clear();
+	species_scoreboard->printf(0, 0, "LIVING");
+	species_scoreboard->printf(SPECIES_SCOREBOARD_LINE_WIDTH_LIVING + 2, 0, "DEAD");
+
+	world->species_tracker.ensure_sorted();
+	for (int i = 0; i < SPECIES_SCOREBOARD_LINES; i++)
+	{
+		Species* alive = world->species_tracker.get_species_rank(i);
+		Species* extinct = world->species_tracker.get_species_rank_extinct(i);
+
+		int living_species_id_x = 0;
+		int living_species_id_y = 1 + i;
+		int living_species_score_x = living_species_id_x + SPECIES_SCOREBOARD_LINE_WIDTH_LIVING;
+		int living_species_score_y = living_species_id_y;
+		int extinct_species_id_x = living_species_id_x + SPECIES_SCOREBOARD_LINE_WIDTH_LIVING+2;
+		int extinct_species_id_y = living_species_id_y;
+		int extinct_species_score_x = extinct_species_id_x + SPECIES_SCOREBOARD_LINE_WIDTH_EXTINCT;
+		int extinct_species_score_y = extinct_species_id_y;
+
+		if (alive != nullptr)
+		{
+			species_scoreboard->putChar(living_species_id_x, living_species_id_y, get_species_char(alive));
+			species_scoreboard->setCharForeground(living_species_id_x, living_species_id_y, get_species_color(alive));
+			species_scoreboard->printf(living_species_score_x, living_species_id_y, species_scoreboard->getBackgroundFlag(), TCOD_RIGHT, "%d", alive->get_alive());
+		}
+		else if (i == 0)
+		{
+			species_scoreboard->printf(living_species_id_x, living_species_id_y, "None");
+		}
+
+		if (extinct != nullptr)
+		{
+			species_scoreboard->putChar(extinct_species_id_x, extinct_species_id_y, get_species_char(extinct));
+			species_scoreboard->setCharForeground(extinct_species_id_x, extinct_species_id_y, get_species_color(extinct));
+			species_scoreboard->printf(extinct_species_score_x, extinct_species_id_y, species_scoreboard->getBackgroundFlag(), TCOD_RIGHT, "%d", extinct->get_total_alive());
+		}
+		else if (i == 0)
+		{
+			species_scoreboard->printf(extinct_species_id_x, extinct_species_id_y, "None");
+		}
+		
+		//Divider
+		species_scoreboard->putChar(extinct_species_id_x - 1, extinct_species_id_y, '|');
+	}
+}
+
+TCODColor Viewer::get_species_color(Species* the_species)
+{
+	TCODColor to_return;
+	if (the_species != nullptr)
+	{
+		to_return = TCODColor::green;
+		to_return.setHue(((float)((char)(the_species->readable_id[0]) - 'a') / 26.0f) * 360);
+	}
+	else
+	{
+		to_return = TCODColor::white;
+	}
+	return to_return;
+}
+
+char Viewer::get_species_char(Species* the_species)
+{
+	char to_return;
+	if (the_species != nullptr)
+	{
+		to_return = the_species->readable_id.back();
+	}
+	else
+	{
+		to_return = '~';
+	}
+	return to_return;
+}
+
 void Viewer::init()
 {
 	TCODConsole::initRoot(MAIN_WINDOW_W, MAIN_WINDOW_H, "ArchEvo Viewer", false);
@@ -197,10 +265,12 @@ void Viewer::draw(WorldState* world)
 		//Update world display
 		update_world(world);
 		update_status(world);
-		
+		update_species_scoreboard(world);
+
 		TCODConsole::blit(world_window, 0, 0, world_window->getWidth(), world_window->getHeight(), TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
 		TCODConsole::blit(status_bar, 0, 0, status_bar->getWidth(), status_bar->getHeight(), TCODConsole::root, 0, 0);
-		
+		TCODConsole::blit(species_scoreboard, 0, 0, species_scoreboard->getWidth(), species_scoreboard->getHeight(), TCODConsole::root, SPECIES_SCOREBOARD_X, SPECIES_SCOREBOARD_Y);
+
 		TCODConsole::flush();
 	}
 }
