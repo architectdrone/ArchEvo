@@ -14,10 +14,10 @@
 #define WORLD_WINDOW_X 2
 #define WORLD_WINDOW_Y 2
 
-#define SPEED_REAL_TIME 0
-#define SPEED_SLOW 1
-#define SPEED_PAUSED 2
-#define SPEED_FAST_FORWARD 3
+#define SPEED_REAL_TIME 0 //Render the screen as fast as possible.
+#define SPEED_SLOW 1 //Update the world once every few ticks
+#define SPEED_PAUSED 2 //Pause updating
+#define SPEED_FAST_FORWARD 3 //Skip rendering the screen
 
 class Viewer
 {

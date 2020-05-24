@@ -4,6 +4,7 @@ int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
 int Viewer::world_offset_y = 0;
+int Viewer::speed = SPEED_REAL_TIME;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
 
 void Viewer::draw_cell(int x, int y, WorldState* world)
@@ -87,15 +88,25 @@ void Viewer::draw(WorldState* world)
 	TCOD_key_t key;
 	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
 
-	switch (key.vk)
+	switch (key.c)
 	{
-	case TCODK_SPACE:
-		fast_forward = !fast_forward;
+		case 'r':
+			speed = SPEED_REAL_TIME;
+			break;
+		case 's':
+			speed = SPEED_SLOW;
+			break;
+		case 'p':
+			speed = SPEED_PAUSED;
+			break;
+		case 'f':
+			speed = SPEED_FAST_FORWARD;
+			break;
 	}
 
 	//Update world display
 	world_window->clear();
-	if (!fast_forward)
+	if (speed != SPEED_FAST_FORWARD || world->get_iteration() % 1000 == 0)
 	{
 		for (int x_i = 0; x_i < WORLD_WINDOW_W; x_i++)
 		{
@@ -112,10 +123,26 @@ void Viewer::draw(WorldState* world)
 			}
 		}
 		TCODConsole::blit(world_window, 0, 0, WORLD_WINDOW_W, WORLD_WINDOW_H, TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
-	}
+		TCODConsole::root->printf(0, 0, "ArchEvo");
+		TCODConsole::root->printf(0, 1, "Iteration %d", world->get_iteration());
+		string speed_string = "";
+		switch (speed)
+		{
+		case SPEED_REAL_TIME:
+			speed_string = "REAL";
+			break;
+		case SPEED_SLOW:
+			speed_string = "SLOW";
+			break;
+		case SPEED_PAUSED:
+			speed_string = "STOP";
+			break;
+		case SPEED_FAST_FORWARD:
+			speed_string = "FAST";
+			break;
+		}
+		TCODConsole::root->printf(MAIN_WINDOW_W - 1, 0, TCODConsole::root->getBackgroundFlag(), TCOD_RIGHT, "%s", speed_string.c_str());
 
-	TCODConsole::root->printf(0, 0, "ArchEvo");
-	TCODConsole::root->printf(0, 1, "Iteration %d", world->get_iteration());
-	
-	TCODConsole::flush();
+		TCODConsole::flush();
+	}
 }
