@@ -5,6 +5,7 @@ bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
 int Viewer::world_offset_y = 0;
 int Viewer::speed = SPEED_REAL_TIME;
+bool Viewer::highlights = true;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
 
 void Viewer::draw_cell(int x, int y, WorldState* world)
@@ -18,8 +19,15 @@ void Viewer::draw_cell(int x, int y, WorldState* world)
 	switch (draw_mode)
 	{
 		case DRAW_LINEAGE:
+			if (cell->lineage_length == 0)
+			{
+				cell_char = '~';
+			}
+			else
+			{
+				cell_char = '0' + (lineage % 10);
+			}
 			
-			cell_char = '0' + (lineage % 10);
 			cell_s = ((int)(lineage / 10)) * 10;
 			if (cell_s > 100)
 			{
@@ -56,22 +64,25 @@ void Viewer::draw_cell(int x, int y, WorldState* world)
 
 void Viewer::draw_background(int x, int y, WorldState* world)
 {
-	vector<int> attacking = ISA::is_attacking(x, y, world);
-	vector<int> reproducing = ISA::is_reproducing(x, y, world);
-	if (attacking[0] != -1)
+	if (highlights)
 	{
-		if (world->get_cell(attacking[0], attacking[1]) != nullptr)
+		vector<int> attacking = ISA::is_attacking(x, y, world);
+		vector<int> reproducing = ISA::is_reproducing(x, y, world);
+		if (attacking[0] != -1)
 		{
-			world_window->setCharBackground(attacking[0], attacking[1], TCODColor::red);
-			world_window->setCharBackground(x, y, TCODColor::lighterRed);
+			if (world->get_cell(attacking[0], attacking[1]) != nullptr)
+			{
+				world_window->setCharBackground(attacking[0], attacking[1], TCODColor::red);
+				world_window->setCharBackground(x, y, TCODColor::lighterRed);
+			}
 		}
-	}
-	else if (reproducing[0] != -1)
-	{
-		if (world->get_cell(reproducing[0], reproducing[1]) == nullptr && world->get_cell(x, y)->energy > INITIAL_ENERGY + 1)
+		else if (reproducing[0] != -1)
 		{
-			world_window->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
-			world_window->setCharBackground(x, y, TCODColor::lighterGreen);
+			if (world->get_cell(reproducing[0], reproducing[1]) == nullptr && world->get_cell(x, y)->energy > INITIAL_ENERGY + 1)
+			{
+				world_window->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
+				world_window->setCharBackground(x, y, TCODColor::lighterGreen);
+			}
 		}
 	}
 }
@@ -101,6 +112,12 @@ void Viewer::draw(WorldState* world)
 			break;
 		case 'f':
 			speed = SPEED_FAST_FORWARD;
+			break;
+		case 'd':
+			draw_mode = (draw_mode + 1) % 3;
+			break;
+		case 'h':
+			highlights = !highlights;
 			break;
 	}
 
@@ -141,8 +158,30 @@ void Viewer::draw(WorldState* world)
 			speed_string = "FAST";
 			break;
 		}
+		string display_string = "";
+		switch (draw_mode)
+		{
+			case DRAW_LINEAGE:
+				display_string = "LINE";
+				break;
+			case DRAW_SPECIES:
+				display_string = "SPEC";
+				break;
+			default:
+				display_string = "BASC";
+				break;
+		}
+		string highlight_string = "";
+		if (highlights)
+		{
+			highlight_string = "HIGH";
+		}
+		else
+		{
+			highlight_string = "NONE";
+		}
 		TCODConsole::root->printf(MAIN_WINDOW_W - 1, 0, TCODConsole::root->getBackgroundFlag(), TCOD_RIGHT, "%s", speed_string.c_str());
-
+		TCODConsole::root->printf(MAIN_WINDOW_W - 1, 1, TCODConsole::root->getBackgroundFlag(), TCOD_RIGHT, "%s|%s", highlight_string.c_str(), display_string.c_str());
 		TCODConsole::flush();
 	}
 }

@@ -34,5 +34,6 @@ public:
 	static void draw(WorldState* world); //Draws the world
 
 	static int draw_mode;
+	static bool highlights;
 	static int speed;
 };
