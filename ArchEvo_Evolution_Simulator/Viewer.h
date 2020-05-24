@@ -26,7 +26,11 @@ private:
 	static void draw_background(int x, int y, WorldState* world);
 	static bool fast_forward;
 
+	static void update_world(WorldState* world);
+	static void update_status(WorldState* world);
+
 	static TCODConsole* world_window;
+	static TCODConsole* status_bar;
 	static int world_offset_x;
 	static int world_offset_y;
 public:

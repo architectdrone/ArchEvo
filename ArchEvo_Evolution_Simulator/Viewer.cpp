@@ -4,9 +4,10 @@ int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
 int Viewer::world_offset_y = 0;
-int Viewer::speed = SPEED_FAST_FORWARD;
+int Viewer::speed = SPEED_REAL_TIME;
 bool Viewer::highlights = true;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
+TCODConsole* Viewer::status_bar = new TCODConsole(MAIN_WINDOW_W, 2);
 
 void Viewer::draw_cell(int x, int y, WorldState* world)
 {
@@ -87,6 +88,74 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 	}
 }
 
+void Viewer::update_world(WorldState* world)
+{
+	for (int x_i = 0; x_i < world_window->getWidth(); x_i++)
+	{
+		for (int y_i = 0; y_i < world_window->getHeight(); y_i++)
+		{
+			int x = x_i + world_offset_x;
+			int y = y_i + world_offset_y;
+
+			if (world->get_cell(x, y) != nullptr)
+			{
+				draw_cell(x, y, world);
+				draw_background(x, y, world);
+			}
+		}
+	}
+	
+}
+
+void Viewer::update_status(WorldState* world)
+{
+	//Status Bar
+	status_bar->printf(0, 0, "ArchEvo");
+	status_bar->printf(0, 1, "Iteration %d", world->get_iteration());
+	string speed_string = "";
+	switch (speed)
+	{
+	case SPEED_REAL_TIME:
+		speed_string = "REAL";
+		break;
+	case SPEED_SLOW:
+		speed_string = "SLOW";
+		break;
+	case SPEED_PAUSED:
+		speed_string = "STOP";
+		break;
+	case SPEED_FAST_FORWARD:
+		speed_string = "FAST";
+		break;
+	}
+	string display_string = "";
+	switch (draw_mode)
+	{
+	case DRAW_LINEAGE:
+		display_string = "LINE";
+		break;
+	case DRAW_SPECIES:
+		display_string = "SPEC";
+		break;
+	default:
+		display_string = "BASC";
+		break;
+	}
+	string highlight_string = "";
+	if (highlights)
+	{
+		highlight_string = "HIGH";
+	}
+	else
+	{
+		highlight_string = "NONE";
+	}
+	status_bar->printf(status_bar->getWidth() - 1, 0, status_bar->getBackgroundFlag(), TCOD_RIGHT, "%s", speed_string.c_str());
+	status_bar->printf(status_bar->getWidth() - 1, 1, status_bar->getBackgroundFlag(), TCOD_RIGHT, "%s|%s", highlight_string.c_str(), display_string.c_str());
+
+	
+}
+
 void Viewer::init()
 {
 	TCODConsole::initRoot(MAIN_WINDOW_W, MAIN_WINDOW_H, "ArchEvo Viewer", false);
@@ -121,67 +190,17 @@ void Viewer::draw(WorldState* world)
 			break;
 	}
 
-	//Update world display
+	
 	world_window->clear();
 	if (speed != SPEED_FAST_FORWARD || world->get_iteration() % 1000 == 0)
 	{
-		for (int x_i = 0; x_i < WORLD_WINDOW_W; x_i++)
-		{
-			for (int y_i = 0; y_i < WORLD_WINDOW_H; y_i++)
-			{
-				int x = x_i + world_offset_x;
-				int y = y_i + world_offset_y;
-
-				if (world->get_cell(x, y) != nullptr)
-				{
-					draw_cell(x, y, world);
-					draw_background(x, y, world);
-				}
-			}
-		}
-		TCODConsole::blit(world_window, 0, 0, WORLD_WINDOW_W, WORLD_WINDOW_H, TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
-		TCODConsole::root->printf(0, 0, "ArchEvo");
-		TCODConsole::root->printf(0, 1, "Iteration %d", world->get_iteration());
-		string speed_string = "";
-		switch (speed)
-		{
-		case SPEED_REAL_TIME:
-			speed_string = "REAL";
-			break;
-		case SPEED_SLOW:
-			speed_string = "SLOW";
-			break;
-		case SPEED_PAUSED:
-			speed_string = "STOP";
-			break;
-		case SPEED_FAST_FORWARD:
-			speed_string = "FAST";
-			break;
-		}
-		string display_string = "";
-		switch (draw_mode)
-		{
-			case DRAW_LINEAGE:
-				display_string = "LINE";
-				break;
-			case DRAW_SPECIES:
-				display_string = "SPEC";
-				break;
-			default:
-				display_string = "BASC";
-				break;
-		}
-		string highlight_string = "";
-		if (highlights)
-		{
-			highlight_string = "HIGH";
-		}
-		else
-		{
-			highlight_string = "NONE";
-		}
-		TCODConsole::root->printf(MAIN_WINDOW_W - 1, 0, TCODConsole::root->getBackgroundFlag(), TCOD_RIGHT, "%s", speed_string.c_str());
-		TCODConsole::root->printf(MAIN_WINDOW_W - 1, 1, TCODConsole::root->getBackgroundFlag(), TCOD_RIGHT, "%s|%s", highlight_string.c_str(), display_string.c_str());
+		//Update world display
+		update_world(world);
+		update_status(world);
+		
+		TCODConsole::blit(world_window, 0, 0, world_window->getWidth(), world_window->getHeight(), TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
+		TCODConsole::blit(status_bar, 0, 0, status_bar->getWidth(), status_bar->getHeight(), TCODConsole::root, 0, 0);
+		
 		TCODConsole::flush();
 	}
 }
