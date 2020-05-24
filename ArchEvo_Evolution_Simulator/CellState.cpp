@@ -5,10 +5,10 @@
 #include <cmath>
 #include <iostream>
 #include <bitset>
+int CellState::next_id = 0;
 using namespace std;
 void CellState::make_random()
 {
-	
 	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
 	{
 		for (int bit = 0; bit < 11; bit++)
@@ -24,6 +24,7 @@ void CellState::make_random()
 	energy = INITIAL_ENERGY;
 	logo = NVO_LOGO;
 	lineage_length = 0;
+	id = next_id++;
 }
 
 void CellState::make_child(CellState parent)
@@ -65,4 +66,5 @@ void CellState::make_child(CellState parent)
 	//cout << "MUTATION RATE: " << (float)mutations / (float)(NUMBER_OF_GENES * 11) << endl;
 	//logo = parent.logo;
 	lineage_length = parent.lineage_length + 1;
+	id = next_id++;
 }

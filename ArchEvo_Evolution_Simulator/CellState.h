@@ -5,6 +5,8 @@
 #define INITIAL_ENERGY 64
 class CellState
 {
+private:
+	static int next_id;
 public:
 	void make_child(CellState parent);
 	void make_random();
@@ -28,4 +30,6 @@ public:
 	int lineage_length = 0;
 	int species_id = 0;
 	int virility = 0;
+
+	int id = 0;
 };

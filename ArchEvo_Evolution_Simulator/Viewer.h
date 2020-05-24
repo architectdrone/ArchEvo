@@ -46,6 +46,11 @@ private:
 	static TCODConsole* species_scoreboard;
 	static int world_offset_x;
 	static int world_offset_y;
+
+	static int mouse_x;
+	static int mouse_y;
+	static int cell_id;
+	static bool click;
 public:
 	static void init(); //Starts the window
 	static void draw(WorldState* world); //Draws the world

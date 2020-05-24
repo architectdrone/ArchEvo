@@ -1,5 +1,6 @@
 #include "Viewer.h"
 #include "Species.h"
+#include <iostream>
 int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
@@ -9,6 +10,11 @@ bool Viewer::highlights = true;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
 TCODConsole* Viewer::status_bar = new TCODConsole(MAIN_WINDOW_W, 2);
 TCODConsole* Viewer::species_scoreboard = new TCODConsole(SPECIES_SCOREBOARD_W, SPECIES_SCOREBOARD_H);
+bool Viewer::click = false;
+int Viewer::mouse_x = 0;
+int Viewer::mouse_y = 0;
+int Viewer::cell_id = -1;
+
 void Viewer::draw_cell(int x, int y, WorldState* world)
 {
 	CellState* cell = world->get_cell(x, y);
@@ -77,19 +83,39 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 			}
 		}
 	}
+
+	if (cell_id == world->get_cell(x, y)->id)
+	{
+		world_window->setCharBackground(x, y, TCODColor::amber);
+	}
 }
 
 void Viewer::update_world(WorldState* world)
 {
+	bool mouse_in_range = false;
+	int world_mouse_x = mouse_x - WORLD_WINDOW_X;
+	int world_mouse_y = mouse_y - WORLD_WINDOW_Y;
+	if (mouse_x < WORLD_WINDOW_X + WORLD_WINDOW_W &&
+		mouse_y < WORLD_WINDOW_Y + WORLD_WINDOW_H &&
+		mouse_x > WORLD_WINDOW_X &&
+		mouse_y > WORLD_WINDOW_Y)
+	{
+		mouse_in_range = true;
+		world_window->setCharBackground(world_mouse_x, world_mouse_y, TCODColor::amber);
+	}
 	for (int x_i = 0; x_i < world_window->getWidth(); x_i++)
 	{
 		for (int y_i = 0; y_i < world_window->getHeight(); y_i++)
 		{
 			int x = x_i + world_offset_x;
 			int y = y_i + world_offset_y;
-
+			
 			if (world->get_cell(x, y) != nullptr)
 			{
+				if (world_mouse_x == x_i && world_mouse_y == y_i && click)
+				{
+					cell_id = world->get_cell(x, y)->id;
+				}
 				draw_cell(x, y, world);
 				draw_background(x, y, world);
 			}
@@ -234,7 +260,8 @@ void Viewer::draw(WorldState* world)
 {
 	TCODConsole::root->clear();
 	TCOD_key_t key;
-	TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
+	TCOD_mouse_t mouse;
+	TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
 	switch (key.c)
 	{
@@ -260,6 +287,9 @@ void Viewer::draw(WorldState* world)
 
 	
 	world_window->clear();
+	mouse_x = mouse.cx;
+	mouse_y = mouse.cy;
+	click = mouse.lbutton_pressed;
 	if (speed != SPEED_FAST_FORWARD || world->get_iteration() % 1000 == 0)
 	{
 		//Update world display
@@ -270,6 +300,8 @@ void Viewer::draw(WorldState* world)
 		TCODConsole::blit(world_window, 0, 0, world_window->getWidth(), world_window->getHeight(), TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
 		TCODConsole::blit(status_bar, 0, 0, status_bar->getWidth(), status_bar->getHeight(), TCODConsole::root, 0, 0);
 		TCODConsole::blit(species_scoreboard, 0, 0, species_scoreboard->getWidth(), species_scoreboard->getHeight(), TCODConsole::root, SPECIES_SCOREBOARD_X, SPECIES_SCOREBOARD_Y);
+
+		
 
 		TCODConsole::flush();
 	}
