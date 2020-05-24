@@ -1,8 +1,11 @@
 #include "Viewer.h"
 #include "Species.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
-int Viewer::size = 0;
 bool Viewer::fast_forward = false;
+int Viewer::world_offset_x = 0;
+int Viewer::world_offset_y = 0;
+TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
+
 void Viewer::draw_cell(int x, int y, WorldState* world)
 {
 	CellState* cell = world->get_cell(x, y);
@@ -46,8 +49,8 @@ void Viewer::draw_cell(int x, int y, WorldState* world)
 			cell_char = 'C';
 			cell_color = TCODColor::red;
 	}
-	TCODConsole::root->putChar(x, y, cell_char);
-	TCODConsole::root->setCharForeground(x, y, cell_color);
+	world_window->putChar(x, y, cell_char);
+	world_window->setCharForeground(x, y, cell_color);
 }
 
 void Viewer::draw_background(int x, int y, WorldState* world)
@@ -58,24 +61,23 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 	{
 		if (world->get_cell(attacking[0], attacking[1]) != nullptr)
 		{
-			TCODConsole::root->setCharBackground(attacking[0], attacking[1], TCODColor::red);
-			TCODConsole::root->setCharBackground(x, y, TCODColor::lightRed);
+			world_window->setCharBackground(attacking[0], attacking[1], TCODColor::red);
+			world_window->setCharBackground(x, y, TCODColor::lighterRed);
 		}
 	}
 	else if (reproducing[0] != -1)
 	{
 		if (world->get_cell(reproducing[0], reproducing[1]) == nullptr && world->get_cell(x, y)->energy > INITIAL_ENERGY + 1)
 		{
-			TCODConsole::root->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
-			TCODConsole::root->setCharBackground(x, y, TCODColor::lightGreen);
+			world_window->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
+			world_window->setCharBackground(x, y, TCODColor::lighterGreen);
 		}
 	}
 }
 
-void Viewer::init(int _size)
+void Viewer::init()
 {
-	TCODConsole::initRoot(_size, _size, "ArchEvo Viewer", false);
-	size = _size;
+	TCODConsole::initRoot(MAIN_WINDOW_W, MAIN_WINDOW_H, "ArchEvo Viewer", false);
 	draw_mode = DRAW_LINEAGE;
 }
 
@@ -91,12 +93,16 @@ void Viewer::draw(WorldState* world)
 		fast_forward = !fast_forward;
 	}
 
+	//Update world display
+	world_window->clear();
 	if (!fast_forward)
 	{
-		for (int x = 0; x < size; x++)
+		for (int x_i = 0; x_i < WORLD_WINDOW_W; x_i++)
 		{
-			for (int y = 0; y < size; y++)
+			for (int y_i = 0; y_i < WORLD_WINDOW_H; y_i++)
 			{
+				int x = x_i + world_offset_x;
+				int y = y_i + world_offset_y;
 
 				if (world->get_cell(x, y) != nullptr)
 				{
@@ -105,7 +111,11 @@ void Viewer::draw(WorldState* world)
 				}
 			}
 		}
-		TCODConsole::flush();
+		TCODConsole::blit(world_window, 0, 0, WORLD_WINDOW_W, WORLD_WINDOW_H, TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
 	}
+
+	TCODConsole::root->printf(0, 0, "ArchEvo");
+	TCODConsole::root->printf(0, 1, "Iteration %d", world->get_iteration());
 	
+	TCODConsole::flush();
 }

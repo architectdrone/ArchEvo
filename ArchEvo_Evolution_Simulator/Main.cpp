@@ -10,7 +10,7 @@ int main()
 {
 	int size = 50;
 	WorldState* world = new WorldState(size, 10000, 3);
-	Viewer::init(size);
+	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;
 	while (true)
 	{

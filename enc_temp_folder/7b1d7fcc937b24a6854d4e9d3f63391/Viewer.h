@@ -14,11 +14,6 @@
 #define WORLD_WINDOW_X 2
 #define WORLD_WINDOW_Y 2
 
-#define SPEED_REAL_TIME 0
-#define SPEED_SLOW 1
-#define SPEED_PAUSED 2
-#define SPEED_FAST_FORWARD 3
-
 class Viewer
 {
 private:
@@ -34,5 +29,4 @@ public:
 	static void draw(WorldState* world); //Draws the world
 
 	static int draw_mode;
-	static int speed;
 };
