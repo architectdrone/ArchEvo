@@ -17,6 +17,15 @@ private:
 	vector<int> children;
 	vector<int> ages;
 	vector<int> virilities;
+	
+	//Extinction caches - this reduces the size of the species in memory as soon as it goes extinct.
+	void create_extinction_cache();
+	bool extinct = false;
+	vector<vector<int>> extinct_prey;
+	vector<vector<int>> extinct_predators;
+	vector<int> extinct_children;
+	vector<vector<int>> extinct_ages;
+	vector<vector<int>> extinct_virilities;
 
 	int number_alive = 0; //Number alive now
 	int total_alive = 0; //Total of this species that has ever lived.
@@ -33,9 +42,12 @@ public:
 
 	vector<vector<int>> all_prey(); //Returns list of prey animals. The first element is the ID, the second is the number of times it was eaten.
 	vector<vector<int>> all_predators(); //See above.
+	vector<vector<int>> all_ages();
+	vector<vector<int>> all_virilities();
+	vector<int> all_children(); //Get list of children
 	float average_age(); //Get average age of species at death.
 	float average_virility(); //Get average virility at death
-	vector<int> all_children(); //Get list of children
+	
 
 	int get_alive();
 	int get_total_alive();

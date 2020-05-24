@@ -32,11 +32,10 @@ vector<vector<int>> condense_list(vector<int> list)
 	return condensed_list;
 }
 
-float list_average(vector<int> list)
+float list_average(vector<vector<int>> condensed)
 {
 	int total = 0;
 	int sum = 0;
-	vector<vector<int>> condensed = condense_list(list);
 	for (int i = 0; i < condensed.size(); i++)
 	{
 		total += condensed[i][1];
@@ -45,8 +44,29 @@ float list_average(vector<int> list)
 	return (float)sum / (float)total;
 }
 
+void Species::create_extinction_cache()
+{
+	extinct_ages = all_ages();
+	extinct_virilities = all_virilities();
+	extinct_prey = all_prey();
+	extinct_predators = all_predators();
+	extinct_children = all_children();
+	
+	prey.clear();
+	predators.clear();
+	children.clear();
+	ages.clear();
+	virilities.clear();
+
+	extinct = true;
+}
+
 void Species::register_birth()
 {
+	if (extinct)
+	{
+		throw "Extinct species was born?";
+	}
 	number_alive++;
 	total_alive++;
 	if (number_alive > peak_alive)
@@ -57,16 +77,28 @@ void Species::register_birth()
 
 void Species::register_eating(int prey_species, int damage)
 {
+	if (extinct)
+	{
+		throw "Extinct species ate?";
+	}
 	prey = extend_and_increment(prey, prey_species, damage);
 }
 
 void Species::register_being_eaten(int predator_species, int damage)
 {
+	if (extinct)
+	{
+		throw "Extinct species was eaten?";
+	}
 	predators = extend_and_increment(predators, predator_species, damage);
 }
 
 void Species::register_dying(CellState* dying_cell, int date)
 {
+	if (extinct)
+	{
+		throw "Extinct species died?";
+	}
 	virilities = extend_and_increment(virilities, dying_cell->virility);
 	ages = extend_and_increment(ages, dying_cell->age);
 	number_alive--;
@@ -81,7 +113,15 @@ void Species::register_dying(CellState* dying_cell, int date)
 
 void Species::register_child_species(int id)
 {
-	children = extend_and_increment(children, id);
+	if (!extinct)
+	{
+		children = extend_and_increment(children, id);
+	}
+	else
+	{
+		extinct_children.push_back(id);
+	}
+	
 }
 
 bool Species::tolerable_difference(CellState* cell)
@@ -105,35 +145,82 @@ bool Species::tolerable_difference(CellState* cell)
 
 vector<vector<int>> Species::all_prey()
 {
-	return condense_list(prey);
+	if (!extinct)
+	{
+		return condense_list(prey);
+	}
+	else
+	{
+		return extinct_prey;
+	}
 }
 
 vector<vector<int>> Species::all_predators()
 {
-	return condense_list(predators);
+	if (!extinct)
+	{
+		return condense_list(predators);
+	}
+	else
+	{
+		return extinct_predators;
+	}
+}
+
+vector<vector<int>> Species::all_ages()
+{
+	if (!extinct)
+	{
+		return condense_list(ages);
+	}
+	else
+	{
+		return extinct_ages;
+	}
+}
+
+vector<vector<int>> Species::all_virilities()
+{
+	if (!extinct)
+	{
+		return condense_list(virilities);
+	}
+	else
+	{
+		return extinct_virilities;
+	}
+	
 }
 
 float Species::average_age()
 {
-	return list_average(ages);
+	return list_average(all_ages());
 }
 
 float Species::average_virility()
 {
-	return list_average(virilities);
+	return list_average(all_virilities());
 }
 
 vector<int> Species::all_children()
 {
-	vector<int> to_return;
-	for (int i = 0; i < children.size(); i++)
+	if (!extinct)
 	{
-		if (children[i] != 0)
+		vector<int> to_return;
+		for (int i = 0; i < children.size(); i++)
 		{
-			to_return.push_back(i);
+			if (children[i] != 0)
+			{
+				to_return.push_back(i);
+			}
 		}
+		return to_return;
 	}
-	return to_return;
+	else
+	{
+		return extinct_children;
+	}
+	
 }
 
 int Species::get_alive()
