@@ -124,7 +124,7 @@ void SpeciesTracker::prune_extinct_species()
 
 bool SpeciesTracker::create_new_species_if_needed(CellState* parent_cell, CellState* child_cell, int date)
 {
-	Species* parent_species = get_species(parent_cell->species_id, false);
+	Species* parent_species = get_species(parent_cell->species_id);
 	if (child_cell->lineage_length > 2) //Only consider cells that have reproduced twice.
 	{
 		bool new_root_species = parent_species == nullptr;
@@ -220,7 +220,7 @@ void SpeciesTracker::print_all_species()
 			{
 				cout << "PRESENT" << endl;
 			}
-			Species* parent_species = get_species(species->parent_id, false);
+			Species* parent_species = get_species(species->parent_id);
 			if (parent_species != nullptr)
 			{
 				cout << "Parent: " << parent_species->readable_id << " (" << species->parent_id << ")" << endl;
@@ -238,7 +238,7 @@ void SpeciesTracker::print_all_species()
 			int root_count = 0;
 			for (int j = 0; j < prey.size(); j++)
 			{
-				Species* prey_species = get_species(prey[j][0], false);
+				Species* prey_species = get_species(prey[j][0]);
 				if (prey_species != nullptr)
 				{
 					cout << "\t" << prey_species->readable_id << " : " << prey[j][1] << endl;

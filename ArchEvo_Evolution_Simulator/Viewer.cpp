@@ -4,7 +4,7 @@ int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
 int Viewer::world_offset_y = 0;
-int Viewer::speed = SPEED_REAL_TIME;
+int Viewer::speed = SPEED_FAST_FORWARD;
 bool Viewer::highlights = true;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
 
