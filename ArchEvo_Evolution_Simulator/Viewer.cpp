@@ -11,12 +11,14 @@ bool Viewer::highlights = true;
 TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW_H);
 TCODConsole* Viewer::status_bar = new TCODConsole(MAIN_WINDOW_W, 2);
 TCODConsole* Viewer::species_scoreboard = new TCODConsole(SPECIES_SCOREBOARD_W, SPECIES_SCOREBOARD_H);
+TCODConsole* Viewer::cell_display = new TCODConsole(CELL_DISPLAY_W, CELL_DISPLAY_H);
 bool Viewer::click = false;
 int Viewer::mouse_x = 0;
 int Viewer::mouse_y = 0;
 int Viewer::cell_id = -1;
 int Viewer::cell_x = 0;
 int Viewer::cell_y = 0;
+CellState* Viewer::the_cell = nullptr;
 
 void Viewer::draw_cell(int x, int y, WorldState* world)
 {
@@ -115,7 +117,7 @@ void Viewer::update_world(WorldState* world)
 	//Calculate World Offset
 	world_offset_x = cell_x -(WORLD_WINDOW_W / 2);
 	world_offset_y = cell_y -(WORLD_WINDOW_H / 2);
-	cout << world_offset_x << ", " << world_offset_y << endl;
+	the_cell = nullptr;
 	for (int x_i = 0; x_i < world_window->getWidth(); x_i++)
 	{
 		for (int y_i = 0; y_i < world_window->getHeight(); y_i++)
@@ -131,11 +133,9 @@ void Viewer::update_world(WorldState* world)
 				}
 				if (cell_id == world->get_cell(x, y)->id)
 				{
-					cout << "\ti = " << x_i << ", " << y_i << endl;
-					cout << "\tw = " << world_offset_x << ", " << world_offset_y << endl;
-					cout << "\tp = " << x << ", " << y << endl;
 					cell_x = ArchEvoGenUtil::true_mod(x, world->get_size());
 					cell_y = ArchEvoGenUtil::true_mod(y, world->get_size());
+					the_cell = world->get_cell(x, y);
 				}
 				draw_cell(x, y, world);
 				draw_background(x, y, world);
@@ -217,8 +217,9 @@ void Viewer::update_species_scoreboard(WorldState* world)
 
 		if (alive != nullptr)
 		{
-			species_scoreboard->putChar(living_species_id_x, living_species_id_y, get_species_char(alive));
-			species_scoreboard->setCharForeground(living_species_id_x, living_species_id_y, get_species_color(alive));
+			//species_scoreboard->putChar(living_species_id_x, living_species_id_y, get_species_char(alive));
+			//species_scoreboard->setCharForeground(living_species_id_x, living_species_id_y, get_species_color(alive));
+			draw_species_icon(species_scoreboard, living_species_id_x, living_species_id_y, alive);
 			species_scoreboard->printf(living_species_score_x, living_species_id_y, species_scoreboard->getBackgroundFlag(), TCOD_RIGHT, "%d", alive->get_alive());
 		}
 		else if (i == 0)
@@ -228,8 +229,7 @@ void Viewer::update_species_scoreboard(WorldState* world)
 
 		if (extinct != nullptr)
 		{
-			species_scoreboard->putChar(extinct_species_id_x, extinct_species_id_y, get_species_char(extinct));
-			species_scoreboard->setCharForeground(extinct_species_id_x, extinct_species_id_y, get_species_color(extinct));
+			draw_species_icon(species_scoreboard, extinct_species_id_x, extinct_species_id_y, extinct);
 			species_scoreboard->printf(extinct_species_score_x, extinct_species_id_y, species_scoreboard->getBackgroundFlag(), TCOD_RIGHT, "%d", extinct->get_total_alive());
 		}
 		else if (i == 0)
@@ -239,6 +239,30 @@ void Viewer::update_species_scoreboard(WorldState* world)
 		
 		//Divider
 		species_scoreboard->putChar(extinct_species_id_x - 1, extinct_species_id_y, '|');
+	}
+}
+
+void Viewer::update_cell_display(WorldState* world)
+{
+	cell_display->clear();
+	if (the_cell != nullptr)
+	{
+		cell_display->printf(0, 0, "SPECIES");
+		Species* cell_species = world->species_tracker.get_species(the_cell->species_id);
+		draw_species_icon(cell_display, CELL_DISPLAY_LINE_WIDTH, 0, cell_species);
+
+		cell_display->printf(0, 1, "AGE");
+		cell_display->printf(CELL_DISPLAY_LINE_WIDTH, 1, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->age);
+
+		cell_display->printf(0, 2, "LINEAGE");
+		cell_display->printf(CELL_DISPLAY_LINE_WIDTH, 2, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->lineage_length);
+	
+		cell_display->printf(0, 3, "VIRILITY");
+		cell_display->printf(CELL_DISPLAY_LINE_WIDTH, 3, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->virility);
+	}
+	else
+	{
+		cell_display->printf(0, 0, "SELECT A CELL!");
 	}
 }
 
@@ -269,6 +293,12 @@ char Viewer::get_species_char(Species* the_species)
 		to_return = '~';
 	}
 	return to_return;
+}
+
+void Viewer::draw_species_icon(TCODConsole* console, int x, int y, Species* species)
+{
+	console->putChar(x, y, get_species_char(species));
+	console->setCharForeground(x, y, get_species_color(species));
 }
 
 void Viewer::init()
@@ -317,11 +347,12 @@ void Viewer::draw(WorldState* world)
 		update_world(world);
 		update_status(world);
 		update_species_scoreboard(world);
+		update_cell_display(world);
 
 		TCODConsole::blit(world_window, 0, 0, world_window->getWidth(), world_window->getHeight(), TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
 		TCODConsole::blit(status_bar, 0, 0, status_bar->getWidth(), status_bar->getHeight(), TCODConsole::root, 0, 0);
 		TCODConsole::blit(species_scoreboard, 0, 0, species_scoreboard->getWidth(), species_scoreboard->getHeight(), TCODConsole::root, SPECIES_SCOREBOARD_X, SPECIES_SCOREBOARD_Y);
-
+		TCODConsole::blit(cell_display, 0, 0, cell_display->getWidth(), cell_display->getHeight(), TCODConsole::root, CELL_DISPLAY_X, CELL_DISPLAY_Y);
 		
 
 		TCODConsole::flush();

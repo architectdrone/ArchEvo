@@ -7,12 +7,12 @@
 #define DRAW_LINEAGE 0
 #define DRAW_SPECIES 1
 
-#define WORLD_WINDOW_W 25
-#define WORLD_WINDOW_H 25
 #define MAIN_WINDOW_W 40
 #define MAIN_WINDOW_H 40
 #define WORLD_WINDOW_X 2
 #define WORLD_WINDOW_Y 2
+#define WORLD_WINDOW_W 25
+#define WORLD_WINDOW_H 25
 #define SPECIES_SCOREBOARD_X 0
 #define SPECIES_SCOREBOARD_Y WORLD_WINDOW_Y+WORLD_WINDOW_H
 #define SPECIES_SCOREBOARD_LINES 10
@@ -20,7 +20,11 @@
 #define SPECIES_SCOREBOARD_LINE_WIDTH_EXTINCT 10
 #define SPECIES_SCOREBOARD_H SPECIES_SCOREBOARD_LINES+1
 #define SPECIES_SCOREBOARD_W SPECIES_SCOREBOARD_LINE_WIDTH_LIVING+SPECIES_SCOREBOARD_LINE_WIDTH_EXTINCT+3
-
+#define CELL_DISPLAY_LINE_WIDTH 10
+#define CELL_DISPLAY_X WORLD_WINDOW_X+WORLD_WINDOW_W
+#define CELL_DISPLAY_Y WORLD_WINDOW_Y
+#define CELL_DISPLAY_W 16
+#define CELL_DISPLAY_H WORLD_WINDOW_H
 
 #define SPEED_REAL_TIME 0 //Render the screen as fast as possible.
 #define SPEED_SLOW 1 //Update the world once every few ticks
@@ -37,13 +41,16 @@ private:
 	static void update_world(WorldState* world);
 	static void update_status(WorldState* world);
 	static void update_species_scoreboard(WorldState* world);
+	static void update_cell_display(WorldState* world);
 
 	static TCODColor get_species_color(Species* the_species);
 	static char get_species_char(Species* the_species);
+	static void draw_species_icon(TCODConsole* console, int x, int y, Species* species);
 
 	static TCODConsole* world_window;
 	static TCODConsole* status_bar;
 	static TCODConsole* species_scoreboard;
+	static TCODConsole* cell_display;
 	static int world_offset_x;
 	static int world_offset_y;
 
@@ -54,6 +61,7 @@ private:
 	static int cell_id;
 	static int cell_x;
 	static int cell_y;
+	static CellState* the_cell;
 public:
 	static void init(); //Starts the window
 	static void draw(WorldState* world); //Draws the world
