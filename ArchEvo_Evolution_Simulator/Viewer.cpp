@@ -1,6 +1,7 @@
 #include "Viewer.h"
 #include "Species.h"
 #include <iostream>
+#include "ArchEvoGenUtil.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
@@ -14,9 +15,13 @@ bool Viewer::click = false;
 int Viewer::mouse_x = 0;
 int Viewer::mouse_y = 0;
 int Viewer::cell_id = -1;
+int Viewer::cell_x = 0;
+int Viewer::cell_y = 0;
 
 void Viewer::draw_cell(int x, int y, WorldState* world)
 {
+	int x_i = x - world_offset_x;
+	int y_i = y - world_offset_y;
 	CellState* cell = world->get_cell(x, y);
 	char cell_char;
 	TCODColor cell_color;
@@ -56,12 +61,14 @@ void Viewer::draw_cell(int x, int y, WorldState* world)
 			cell_char = 'C';
 			cell_color = TCODColor::red;
 	}
-	world_window->putChar(x, y, cell_char);
-	world_window->setCharForeground(x, y, cell_color);
+	world_window->putChar(x_i, y_i, cell_char);
+	world_window->setCharForeground(x_i, y_i, cell_color);
 }
 
 void Viewer::draw_background(int x, int y, WorldState* world)
 {
+	int x_i = x - world_offset_x;
+	int y_i = y - world_offset_y;
 	if (highlights)
 	{
 		vector<int> attacking = ISA::is_attacking(x, y, world);
@@ -71,7 +78,7 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 			if (world->get_cell(attacking[0], attacking[1]) != nullptr)
 			{
 				world_window->setCharBackground(attacking[0], attacking[1], TCODColor::red);
-				world_window->setCharBackground(x, y, TCODColor::lighterRed);
+				world_window->setCharBackground(x_i, y_i, TCODColor::lighterRed);
 			}
 		}
 		else if (reproducing[0] != -1)
@@ -79,19 +86,20 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 			if (world->get_cell(reproducing[0], reproducing[1]) == nullptr && world->get_cell(x, y)->energy > INITIAL_ENERGY + 1)
 			{
 				world_window->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
-				world_window->setCharBackground(x, y, TCODColor::lighterGreen);
+				world_window->setCharBackground(x_i, y_i, TCODColor::lighterGreen);
 			}
 		}
 	}
 
 	if (cell_id == world->get_cell(x, y)->id)
 	{
-		world_window->setCharBackground(x, y, TCODColor::amber);
+		world_window->setCharBackground(x_i, y_i, TCODColor::amber);
 	}
 }
 
 void Viewer::update_world(WorldState* world)
 {
+	//Update Mouse
 	bool mouse_in_range = false;
 	int world_mouse_x = mouse_x - WORLD_WINDOW_X;
 	int world_mouse_y = mouse_y - WORLD_WINDOW_Y;
@@ -103,6 +111,11 @@ void Viewer::update_world(WorldState* world)
 		mouse_in_range = true;
 		world_window->setCharBackground(world_mouse_x, world_mouse_y, TCODColor::amber);
 	}
+
+	//Calculate World Offset
+	world_offset_x = cell_x -(WORLD_WINDOW_W / 2);
+	world_offset_y = cell_y -(WORLD_WINDOW_H / 2);
+	cout << world_offset_x << ", " << world_offset_y << endl;
 	for (int x_i = 0; x_i < world_window->getWidth(); x_i++)
 	{
 		for (int y_i = 0; y_i < world_window->getHeight(); y_i++)
@@ -115,6 +128,14 @@ void Viewer::update_world(WorldState* world)
 				if (world_mouse_x == x_i && world_mouse_y == y_i && click)
 				{
 					cell_id = world->get_cell(x, y)->id;
+				}
+				if (cell_id == world->get_cell(x, y)->id)
+				{
+					cout << "\ti = " << x_i << ", " << y_i << endl;
+					cout << "\tw = " << world_offset_x << ", " << world_offset_y << endl;
+					cout << "\tp = " << x << ", " << y << endl;
+					cell_x = ArchEvoGenUtil::true_mod(x, world->get_size());
+					cell_y = ArchEvoGenUtil::true_mod(y, world->get_size());
 				}
 				draw_cell(x, y, world);
 				draw_background(x, y, world);

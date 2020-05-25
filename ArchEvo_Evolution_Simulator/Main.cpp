@@ -8,7 +8,7 @@ using namespace std;
 
 int main()
 {
-	int size = 5;
+	int size = 20;
 	WorldState* world = new WorldState(size, 10000, 1);
 	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;

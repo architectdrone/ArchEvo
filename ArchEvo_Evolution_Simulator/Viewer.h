@@ -49,8 +49,11 @@ private:
 
 	static int mouse_x;
 	static int mouse_y;
-	static int cell_id;
 	static bool click;
+
+	static int cell_id;
+	static int cell_x;
+	static int cell_y;
 public:
 	static void init(); //Starts the window
 	static void draw(WorldState* world); //Draws the world
