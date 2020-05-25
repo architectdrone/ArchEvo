@@ -32,4 +32,5 @@ public:
 	int virility = 0;
 
 	int id = 0;
+	int last_iteration = -1;
 };

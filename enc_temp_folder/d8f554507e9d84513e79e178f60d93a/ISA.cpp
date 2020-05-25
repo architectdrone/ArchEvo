@@ -288,10 +288,7 @@ void ISA::execute(int x, int y, WorldState* world)
 	}
 	else if (current->last_iteration == world->get_iteration())
 	{
-		//Super janky way to avoid updating a cell more than once. 
-		//This might happen if a moves to a position that has not yet updated yet. It is a downside of the relatively fast system I use to store cell states.
-		//Some other things like that might come up. For example, a cell's iploc regs could be rendered incorrect by moving in/out of the iploc before updating.
-		//Really, I don't care about data races. It is entirely deterministic. If the cells evolve to exploit them, that would unlikely but highly interesting.
+		//Super janky way to avoid updating a cell more than once. Really, I don't care about data races. If the cells evolve to exploit them, that would unlikely but highly interesting.
 		return;
 	}
 	current->last_iteration = world->get_iteration();
