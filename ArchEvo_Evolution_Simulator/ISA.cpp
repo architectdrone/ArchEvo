@@ -480,6 +480,10 @@ void ISA::set_reg(int x, int y, int reg, int new_value, WorldState* world)
 int ISA::get_reg(int x, int y, int reg, WorldState* world)
 {
 	CellState* current = world->get_cell(x, y);
+	if (current == nullptr)
+	{
+		return 0;
+	}
 	if (reg == ENERGY_REG)
 	{
 		return current->energy;

@@ -44,14 +44,11 @@ using namespace std;
 class ISA
 {   
     private:
-        static int iploc_x(int x, int y, int iploc);
-        static int iploc_y(int x, int y, int iploc);
         static int get_bit(int byte, int bit_num);
         static void attack(int attacker_x, int attacker_y, int victim_x, int victim_y, WorldState* world);
         static bool reproduce(int parent_x, int parent_y, int child_x, int child_y, WorldState* world);
         static int find(int x, int y, WorldState* world, int initial_ip);
         static void set_reg(int x, int y, int reg, int new_value, WorldState* world);
-        static int get_reg(int x, int y, int reg, WorldState* world);
         static int get_int_from_bits(int byte, int first_bit, int last_bit);
         static int get_R1(int instruction);
         static int get_R2(int instruction);
@@ -75,5 +72,9 @@ class ISA
 
         static vector<int> is_reproducing(int x, int y, WorldState* world);
         static vector<int> is_attacking(int x, int y, WorldState* world);
+
+        static int get_reg(int x, int y, int reg, WorldState* world);
+        static int iploc_x(int x, int y, int iploc);
+        static int iploc_y(int x, int y, int iploc);
 };
 

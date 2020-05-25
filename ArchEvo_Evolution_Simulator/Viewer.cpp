@@ -1,6 +1,7 @@
 #include "Viewer.h"
 #include "Species.h"
 #include <iostream>
+#include <bitset>
 #include "ArchEvoGenUtil.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
@@ -12,6 +13,8 @@ TCODConsole* Viewer::world_window = new TCODConsole(WORLD_WINDOW_W, WORLD_WINDOW
 TCODConsole* Viewer::status_bar = new TCODConsole(MAIN_WINDOW_W, 2);
 TCODConsole* Viewer::species_scoreboard = new TCODConsole(SPECIES_SCOREBOARD_W, SPECIES_SCOREBOARD_H);
 TCODConsole* Viewer::cell_display = new TCODConsole(CELL_DISPLAY_W, CELL_DISPLAY_H);
+TCODConsole* Viewer::register_display = new TCODConsole(REGISTER_DISPLAY_W, REGISTER_DISPLAY_H);
+
 bool Viewer::click = false;
 int Viewer::mouse_x = 0;
 int Viewer::mouse_y = 0;
@@ -266,6 +269,72 @@ void Viewer::update_cell_display(WorldState* world)
 	}
 }
 
+void print_bits_and_decimal_display(TCODConsole* console, int x, int y, int number)
+{
+	string bit_string = bitset<REGISTER_DISPLAY_REGISTER_BITS>(number).to_string();
+	console->printf(x, y, "%s", bit_string.c_str());
+	console->printf(x + REGISTER_DISPLAY_REGISTER_BITS+REGISTER_DISPLAY_REGISTER_REP_DISTANCE + REGISTER_DISPLAY_REP_WIDTH, y, console->getBackgroundFlag(), TCOD_RIGHT, "%d", number);
+}
+
+void Viewer::update_register_display(WorldState* world)
+{
+	register_display->clear();
+	int name_column_start_x = 0;
+	int binary_display_width = REGISTER_DISPLAY_REGISTER_BITS + REGISTER_DISPLAY_REP_WIDTH + REGISTER_DISPLAY_REGISTER_REP_DISTANCE + REGISTER_DISPLAY_X_DISTANCE;
+	int cell_column_start_x = REGISTER_DISPLAY_NAME_WIDTH;
+	int iploc_column_start_x = cell_column_start_x + binary_display_width;
+	register_display->printf(cell_column_start_x , 0, "CELL");
+	register_display->printf(iploc_column_start_x, 0, "IPLOC");
+
+	//Make Name Column
+	register_display->printf(name_column_start_x, 1, "ENERGY");
+	register_display->printf(name_column_start_x, 2, "LOGO");
+	register_display->printf(name_column_start_x, 3, "GUESS");
+	register_display->printf(name_column_start_x, 4, "REG_A");
+	register_display->printf(name_column_start_x, 5, "REG_B");
+	register_display->printf(name_column_start_x, 6, "REG_C");
+	register_display->printf(name_column_start_x, 7, "REG_D");
+	register_display->printf(name_column_start_x, 8, "IPLOC");
+
+	if (the_cell != nullptr)
+	{
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 1, ISA::get_reg(cell_x, cell_y, ENERGY_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 2, ISA::get_reg(cell_x, cell_y, LOGO_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 3, ISA::get_reg(cell_x, cell_y, GUESS_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 4, ISA::get_reg(cell_x, cell_y, A_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 5, ISA::get_reg(cell_x, cell_y, B_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 6, ISA::get_reg(cell_x, cell_y, C_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 7, ISA::get_reg(cell_x, cell_y, D_REG, world));
+		print_bits_and_decimal_display(register_display, cell_column_start_x, 8, ISA::get_reg(cell_x, cell_y, IPLOC_REG, world));
+
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 1, ISA::get_reg(cell_x, cell_y, ENERGY_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 2, ISA::get_reg(cell_x, cell_y, LOGO_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 3, ISA::get_reg(cell_x, cell_y, GUESS_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 4, ISA::get_reg(cell_x, cell_y, A_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 5, ISA::get_reg(cell_x, cell_y, B_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 6, ISA::get_reg(cell_x, cell_y, C_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 7, ISA::get_reg(cell_x, cell_y, D_IREG, world));
+		print_bits_and_decimal_display(register_display, iploc_column_start_x, 8, ISA::get_reg(cell_x, cell_y, IPLOC_IREG, world));
+		
+		//iploc display
+		int physical_iploc_x = cell_column_start_x + binary_display_width - 3;
+		int physical_iploc_y = 11;
+		int iploc_iploc_x = iploc_column_start_x + binary_display_width - 3;
+		int iploc_iploc_y = physical_iploc_y;
+
+		int physcial_iploc_result_x = ISA::iploc_x(physical_iploc_x, physical_iploc_y, ISA::get_reg(cell_x, cell_y, IPLOC_REG, world));
+		int physcial_iploc_result_y = ISA::iploc_y(physical_iploc_x, physical_iploc_y, ISA::get_reg(cell_x, cell_y, IPLOC_REG, world));
+		int iploc_iploc_result_x = ISA::iploc_x(iploc_iploc_x, iploc_iploc_y, ISA::get_reg(cell_x, cell_y, IPLOC_IREG, world));
+		int iploc_iploc_result_y = ISA::iploc_y(iploc_iploc_x, iploc_iploc_y, ISA::get_reg(cell_x, cell_y, IPLOC_IREG, world));
+
+		register_display->putChar(physical_iploc_x, physical_iploc_y, 'C');
+		register_display->putChar(iploc_iploc_x, iploc_iploc_y, 'C');
+
+		register_display->putChar(physcial_iploc_result_x, physcial_iploc_result_y, 'I');
+		register_display->putChar(iploc_iploc_result_x, iploc_iploc_result_y, 'I');
+	}
+}
+
 TCODColor Viewer::get_species_color(Species* the_species)
 {
 	TCODColor to_return;
@@ -306,8 +375,6 @@ void Viewer::init()
 	TCODConsole::initRoot(MAIN_WINDOW_W, MAIN_WINDOW_H, "ArchEvo Viewer", false);
 	draw_mode = DRAW_LINEAGE;
 }
-
-int h_press = 0;
 
 void Viewer::draw(WorldState* world)
 {
@@ -350,12 +417,13 @@ void Viewer::draw(WorldState* world)
 		update_status(world);
 		update_species_scoreboard(world);
 		update_cell_display(world);
+		update_register_display(world);
 
 		TCODConsole::blit(world_window, 0, 0, world_window->getWidth(), world_window->getHeight(), TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
 		TCODConsole::blit(status_bar, 0, 0, status_bar->getWidth(), status_bar->getHeight(), TCODConsole::root, 0, 0);
 		TCODConsole::blit(species_scoreboard, 0, 0, species_scoreboard->getWidth(), species_scoreboard->getHeight(), TCODConsole::root, SPECIES_SCOREBOARD_X, SPECIES_SCOREBOARD_Y);
 		TCODConsole::blit(cell_display, 0, 0, cell_display->getWidth(), cell_display->getHeight(), TCODConsole::root, CELL_DISPLAY_X, CELL_DISPLAY_Y);
-		
+		TCODConsole::blit(register_display, 0, 0, register_display->getWidth(), register_display->getHeight(), TCODConsole::root, REGISTER_DISPLAY_X, REGISTER_DISPLAY_Y);
 
 		TCODConsole::flush();
 	}
