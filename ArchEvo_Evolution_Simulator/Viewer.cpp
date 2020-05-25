@@ -79,7 +79,7 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 		{
 			if (world->get_cell(attacking[0], attacking[1]) != nullptr)
 			{
-				world_window->setCharBackground(attacking[0], attacking[1], TCODColor::red);
+				world_window->setCharBackground(attacking[0]-world_offset_x, attacking[1] - world_offset_y, TCODColor::red);
 				world_window->setCharBackground(x_i, y_i, TCODColor::lighterRed);
 			}
 		}
@@ -87,7 +87,7 @@ void Viewer::draw_background(int x, int y, WorldState* world)
 		{
 			if (world->get_cell(reproducing[0], reproducing[1]) == nullptr && world->get_cell(x, y)->energy > INITIAL_ENERGY + 1)
 			{
-				world_window->setCharBackground(reproducing[0], reproducing[1], TCODColor::green);
+				world_window->setCharBackground(reproducing[0] - world_offset_x, reproducing[1] - world_offset_y, TCODColor::green);
 				world_window->setCharBackground(x_i, y_i, TCODColor::lighterGreen);
 			}
 		}
