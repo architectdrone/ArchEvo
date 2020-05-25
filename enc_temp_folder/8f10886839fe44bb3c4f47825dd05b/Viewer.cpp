@@ -1,6 +1,10 @@
 #include "Viewer.h"
 #include "Species.h"
 #include <iostream>
+#include <time.h>
+#include <stdlib.h>
+#include <Windows.h>
+#include <cstdlib>
 #include "ArchEvoGenUtil.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;

@@ -9,7 +9,7 @@
 
 #define MAIN_WINDOW_W 40
 #define MAIN_WINDOW_H 40
-#define WORLD_WINDOW_X 2
+#define WORLD_WINDOW_X 0
 #define WORLD_WINDOW_Y 2
 #define WORLD_WINDOW_W 25
 #define WORLD_WINDOW_H 25
