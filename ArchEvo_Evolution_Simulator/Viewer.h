@@ -34,6 +34,13 @@
 #define REGISTER_DISPLAY_NAME_WIDTH 7
 #define REGISTER_DISPLAY_W REGISTER_DISPLAY_NAME_WIDTH+2*(REGISTER_DISPLAY_REGISTER_BITS+REGISTER_DISPLAY_REP_WIDTH+REGISTER_DISPLAY_REGISTER_REP_DISTANCE)+REGISTER_DISPLAY_X_DISTANCE+2
 #define REGISTER_DISPLAY_H 13
+#define GENOME_DISPLAY_X REGISTER_DISPLAY_X
+#define GENOME_DISPLAY_Y REGISTER_DISPLAY_Y+REGISTER_DISPLAY_H
+#define GENOME_DISPLAY_LINES 7
+#define GENOME_DISPLAY_INSTRUCTION_BITS 11
+#define GENOME_DISPLAY_INSTRUCTION_NAME_WIDTH 30
+#define GENOME_DISPLAY_W 2+GENOME_DISPLAY_INSTRUCTION_BITS+1+GENOME_DISPLAY_INSTRUCTION_NAME_WIDTH
+#define GENOME_DISPLAY_H GENOME_DISPLAY_LINES
 
 #define SPEED_REAL_TIME 0 //Render the screen as fast as possible.
 #define SPEED_SLOW 1 //Update the world once every few ticks
@@ -52,6 +59,7 @@ private:
 	static void update_species_scoreboard(WorldState* world);
 	static void update_cell_display(WorldState* world);
 	static void update_register_display(WorldState* world);
+	static void update_genome_display(WorldState* world);
 
 	static TCODColor get_species_color(Species* the_species);
 	static char get_species_char(Species* the_species);
@@ -62,6 +70,8 @@ private:
 	static TCODConsole* species_scoreboard;
 	static TCODConsole* cell_display;
 	static TCODConsole* register_display;
+	static TCODConsole* genome_display;
+
 	static int world_offset_x;
 	static int world_offset_y;
 

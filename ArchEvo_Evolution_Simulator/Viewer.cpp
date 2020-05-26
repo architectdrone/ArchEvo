@@ -14,6 +14,7 @@ TCODConsole* Viewer::status_bar = new TCODConsole(MAIN_WINDOW_W, 2);
 TCODConsole* Viewer::species_scoreboard = new TCODConsole(SPECIES_SCOREBOARD_W, SPECIES_SCOREBOARD_H);
 TCODConsole* Viewer::cell_display = new TCODConsole(CELL_DISPLAY_W, CELL_DISPLAY_H);
 TCODConsole* Viewer::register_display = new TCODConsole(REGISTER_DISPLAY_W, REGISTER_DISPLAY_H);
+TCODConsole* Viewer::genome_display = new TCODConsole(GENOME_DISPLAY_W, GENOME_DISPLAY_H);
 
 bool Viewer::click = false;
 int Viewer::mouse_x = 0;
@@ -335,6 +336,32 @@ void Viewer::update_register_display(WorldState* world)
 	}
 }
 
+void Viewer::update_genome_display(WorldState* world)
+{
+	genome_display->clear();
+	if (the_cell == nullptr)
+	{
+		return;
+	}
+	int first_instruction = the_cell->ip-(GENOME_DISPLAY_LINES/2);
+
+	int pointer_column_x = 0;
+	int gene_column_x = pointer_column_x+2;
+	int name_column_x = gene_column_x + GENOME_DISPLAY_INSTRUCTION_BITS + 1;
+	for (int i = 0; i < GENOME_DISPLAY_LINES; i++)
+	{
+		int y = i;
+		int ip = ArchEvoGenUtil::true_mod(i + first_instruction, NUMBER_OF_GENES);
+		int instruction = the_cell->genes[ip];
+		if (ip == the_cell->ip)
+		{
+			genome_display->printf(pointer_column_x, y, ">");
+		}
+		genome_display->printf(gene_column_x, y, "%s", bitset<GENOME_DISPLAY_INSTRUCTION_BITS>(instruction).to_string().c_str());
+		genome_display->printf(name_column_x, y, "%s", ISA::get_instruction_name(instruction).c_str());
+	}
+}
+
 TCODColor Viewer::get_species_color(Species* the_species)
 {
 	TCODColor to_return;
@@ -418,12 +445,14 @@ void Viewer::draw(WorldState* world)
 		update_species_scoreboard(world);
 		update_cell_display(world);
 		update_register_display(world);
+		update_genome_display(world);
 
 		TCODConsole::blit(world_window, 0, 0, world_window->getWidth(), world_window->getHeight(), TCODConsole::root, WORLD_WINDOW_X, WORLD_WINDOW_Y);
 		TCODConsole::blit(status_bar, 0, 0, status_bar->getWidth(), status_bar->getHeight(), TCODConsole::root, 0, 0);
 		TCODConsole::blit(species_scoreboard, 0, 0, species_scoreboard->getWidth(), species_scoreboard->getHeight(), TCODConsole::root, SPECIES_SCOREBOARD_X, SPECIES_SCOREBOARD_Y);
 		TCODConsole::blit(cell_display, 0, 0, cell_display->getWidth(), cell_display->getHeight(), TCODConsole::root, CELL_DISPLAY_X, CELL_DISPLAY_Y);
 		TCODConsole::blit(register_display, 0, 0, register_display->getWidth(), register_display->getHeight(), TCODConsole::root, REGISTER_DISPLAY_X, REGISTER_DISPLAY_Y);
+		TCODConsole::blit(genome_display, 0, 0, genome_display->getWidth(), genome_display->getHeight(), TCODConsole::root, GENOME_DISPLAY_X, GENOME_DISPLAY_Y);
 
 		TCODConsole::flush();
 	}
