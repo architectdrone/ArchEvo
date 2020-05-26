@@ -79,7 +79,7 @@ vector<int> condensed_list_to_uncondensed_list(vector<vector<int>> uncondensed_l
 	vector<int> to_return;
 	for (int i = 0; i < uncondensed_list.size(); i++)
 	{
-		extend_and_increment(to_return, uncondensed_list[i][0], uncondensed_list[i][1]);
+		to_return = extend_and_increment(to_return, uncondensed_list[i][0], uncondensed_list[i][1]);
 	}
 	return to_return;
 }
@@ -314,7 +314,7 @@ string Species::get_save_string()
 	string children_string = "";
 	for (int i = 0; i < all_children().size(); i++)
 	{
-		children_string += all_children()[i] + ",";
+		children_string += to_string(all_children()[i]) + ",";
 	}
 	to_return += children_string + ";";
 	return to_return;

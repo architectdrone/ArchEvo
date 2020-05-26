@@ -321,8 +321,6 @@ void SpeciesTracker::save_species_vector(string filename, vector<Species*> input
 	species_file.open(filename);
 	for (int i = 0; i < input.size(); i++)
 	{
-		Species* test_species = new Species();
-		test_species->load_from_string(input[i]->get_save_string(), true);
 		species_file << input[i]->get_save_string() << "\n";
 	}
 	species_file.close();
