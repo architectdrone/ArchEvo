@@ -250,6 +250,10 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 		}
 		else
 		{
+			if (initial_template_length == 0)
+			{
+				return ArchEvoGenUtil::true_mod(initial_ip+1, NUMBER_OF_GENES);
+			}
 			if (in_initial_template)
 			{
 				//cout << "Length of original template " << initial_template_length << endl;
@@ -311,7 +315,7 @@ void ISA::execute(int x, int y, WorldState* world)
 	}
 	
 	
-	current->ip = ((current->ip) + 1) % NUMBER_OF_GENES; //Increment Instruction Pointer
+	
 	current->age += 1; //Increment Age
 
 	
@@ -329,6 +333,8 @@ void ISA::execute(int x, int y, WorldState* world)
 	int target_x = iploc_x(x, y, current->iploc);
 	int target_y = iploc_y(x, y, current->iploc);
 
+	bool ip_op = false;
+
 	if (R1 == ENERGY_REG || (R1 > IPLOC_REG))
 	{
 		//Cell Operations
@@ -340,6 +346,7 @@ void ISA::execute(int x, int y, WorldState* world)
 		else if (op == JMP_COP)
 		{
 			current->ip = find(x, y, world, current->ip);
+			ip_op = true;
 			//cout << "Jumping forward to " << current->ip << endl;
 		}
 		else if (op == JPC_COP)
@@ -347,6 +354,7 @@ void ISA::execute(int x, int y, WorldState* world)
 			if (R2_value == 0xFF)
 			{
 				current->ip = find(x, y, world, current->ip);
+				ip_op = true;
 			}
 		}
 		else if (op == MOV_COP)
@@ -384,11 +392,13 @@ void ISA::execute(int x, int y, WorldState* world)
 		}
 		else if (op == SLL_ROP)
 		{
-			new_R1 = R1_value << 1;
+			//new_R1 = R1_value << 1;
+			new_R1 = R1 * 2;
 		}
 		else if (op == SRL_ROP)
 		{
-			new_R1 = R1_value >> 1;
+			//new_R1 = R1_value >> 1;
+			new_R1 = (int)(R1 / 2);
 		}
 		else if (op == MOV_ROP)
 		{
@@ -428,6 +438,11 @@ void ISA::execute(int x, int y, WorldState* world)
 			}
 		}
 		set_reg(x, y, R1, new_R1, world);
+	}
+
+	if (!ip_op)
+	{
+		current->ip = ((current->ip) + 1) % NUMBER_OF_GENES; //Increment Instruction Pointer
 	}
 }
 
