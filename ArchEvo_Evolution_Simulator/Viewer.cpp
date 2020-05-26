@@ -251,18 +251,57 @@ void Viewer::update_cell_display(WorldState* world)
 	cell_display->clear();
 	if (the_cell != nullptr)
 	{
-		cell_display->printf(0, 0, "SPECIES");
+		int row_1_x = 0;
+		int row_2_x = row_1_x + CELL_DISPLAY_LINE_WIDTH+2;
+		int row_3_x = row_2_x + CELL_DISPLAY_LINE_WIDTH + 2;
+		cell_display->printf(row_1_x, 0, "SPC");
 		Species* cell_species = world->species_tracker.get_species(the_cell->species_id);
-		draw_species_icon(cell_display, CELL_DISPLAY_LINE_WIDTH, 0, cell_species);
+		draw_species_icon(cell_display, row_1_x + CELL_DISPLAY_LINE_WIDTH, 0, cell_species);
 
-		cell_display->printf(0, 1, "AGE");
-		cell_display->printf(CELL_DISPLAY_LINE_WIDTH, 1, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->age);
+		cell_display->printf(row_1_x, 1, "LIN");
+		cell_display->printf(row_1_x + CELL_DISPLAY_LINE_WIDTH, 1, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->lineage_length);
 
-		cell_display->printf(0, 2, "LINEAGE");
-		cell_display->printf(CELL_DISPLAY_LINE_WIDTH, 2, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->lineage_length);
+		cell_display->printf(row_1_x, 2, "AGE");
+		cell_display->printf(row_1_x+CELL_DISPLAY_LINE_WIDTH, 2, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->age);
 	
-		cell_display->printf(0, 3, "VIRILITY");
-		cell_display->printf(CELL_DISPLAY_LINE_WIDTH, 3, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->virility);
+		cell_display->printf(row_1_x, 3, "VIR");
+		cell_display->printf(row_1_x + CELL_DISPLAY_LINE_WIDTH, 3, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->virility);
+	
+		
+		if (cell_species != nullptr)
+		{
+			//row 2
+			Species* parent_species = world->species_tracker.get_species(cell_species->parent_id);
+			cell_display->printf(row_2_x, 0, "PAR");
+			draw_species_icon(cell_display, row_2_x + CELL_DISPLAY_LINE_WIDTH, 0, parent_species);
+
+			cell_display->printf(row_2_x, 1, "SID");
+			cell_display->printf(row_2_x + CELL_DISPLAY_LINE_WIDTH, 1, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", the_cell->species_id);
+
+			if (cell_species->get_total_alive() != cell_species->get_alive())
+			{
+				//If no cells have died, it is impossible to calculuate the average age and virility
+				cell_display->printf(row_2_x, 2, "S_AGE");
+				cell_display->printf(row_2_x + CELL_DISPLAY_LINE_WIDTH, 2, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%4.1f", cell_species->average_age());
+
+				cell_display->printf(row_2_x, 3, "S_VIR");
+				cell_display->printf(row_2_x + CELL_DISPLAY_LINE_WIDTH, 3, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%4.1f", cell_species->average_virility());
+			}
+			
+			//row 3
+			cell_display->printf(row_3_x, 0, "ARR");
+			cell_display->printf(row_3_x + CELL_DISPLAY_LINE_WIDTH, 0, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", cell_species->arrival_date);
+
+			cell_display->printf(row_3_x, 1, "TOT");
+			cell_display->printf(row_3_x + CELL_DISPLAY_LINE_WIDTH, 1, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", cell_species->get_total_alive());
+
+			cell_display->printf(row_3_x, 2, "PEK");
+			cell_display->printf(row_3_x + CELL_DISPLAY_LINE_WIDTH, 2, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", cell_species->get_peak_alive());
+
+			cell_display->printf(row_3_x, 3, "CUR");
+			cell_display->printf(row_3_x + CELL_DISPLAY_LINE_WIDTH, 3, cell_display->getBackgroundFlag(), TCOD_RIGHT, "%d", cell_species->get_alive());
+		}
+		
 	}
 	else
 	{

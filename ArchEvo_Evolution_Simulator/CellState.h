@@ -15,7 +15,7 @@ public:
 	int ip = 0;
 	int genes[NUMBER_OF_GENES];
 
-	//Registers
+	//Physical Registers
 	int energy = 0;
 	int logo   = 0;
 	int guess = 0;
