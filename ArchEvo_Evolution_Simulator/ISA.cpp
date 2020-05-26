@@ -195,6 +195,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 	bool in_initial_template = true;
 	bool testing_template = false;
 	int best_template_start = -1;
+	int best_template_length = 0;
 	int best_template_score = 0;
 	int current_template_start = 0;
 	int current_template_length = 0;
@@ -241,7 +242,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 				}
 				//cout << "Current Template Length " << current_template_length << endl;
 				//cout << get_instruction_name(current_cell->genes[initial_template_position-1]) << "?=" << get_instruction_name(current_cell->genes[current_ip]) << endl;
-				if (current_cell->genes[initial_template_position-1] == current_cell->genes[current_ip])
+				if (current_cell->genes[initial_template_position + current_template_length - 1] == current_cell->genes[current_ip])
 				{
 					current_template_score++;
 				}
@@ -268,6 +269,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 				{
 					best_template_score = current_template_score;
 					best_template_start = current_template_start;
+					best_template_length = current_template_length;
 				}
 			}
 		}
@@ -279,7 +281,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 		//cout << "No other templates found" << endl;
 		return initial_ip;
 	}
-	return best_template_start;
+	return ArchEvoGenUtil::true_mod(best_template_start+best_template_length, NUMBER_OF_GENES);
 }
 
 void ISA::execute(int x, int y, WorldState* world)
