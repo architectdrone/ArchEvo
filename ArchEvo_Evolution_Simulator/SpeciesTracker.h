@@ -9,7 +9,7 @@ private:
 
 	vector<Species*> species_list;
 	vector<Species*> extinct_species_list;
-	int next_species_id = 0;
+	
 
 public:
 	~SpeciesTracker();
@@ -24,4 +24,12 @@ public:
 	void extinction_if_needed(CellState* dead_cell, int date);
 	void print_all_species();
 	void ensure_sorted();
+
+	void save_species_vector(string filename, vector<Species*> input);
+
+	void load_species_vector(string filename, bool extinct);
+
+	void save_state(string filename);
+	void load_state(string filename);
+	int next_species_id = 0;
 };

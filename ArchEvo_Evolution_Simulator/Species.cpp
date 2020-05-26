@@ -2,6 +2,7 @@
 #include <type_traits>
 #include <iostream>
 #include "ISA.h"
+#include "ArchEvoGenUtil.h"
 using namespace std;
 
 vector<int> extend_and_increment(vector<int> input, int index, int amount = 1)
@@ -42,6 +43,45 @@ float list_average(vector<vector<int>> condensed)
 		sum += condensed[i][1] * condensed[i][0];
 	}
 	return (float)sum / (float)total;
+}
+
+string list_to_string(vector<vector<int>> list)
+{
+	string to_return = "";
+	for (int i = 0; i < list.size(); i++)
+	{
+		int a = list[i][0];
+		int b = list[i][1];
+		to_return += to_string(a) + "-" + to_string(b) + ",";
+	}
+	return to_return;
+}
+
+vector<vector<int>> string_to_list(string list_string)
+{
+	vector<vector<int>> to_return;
+	string just_read = "a";
+	int i = 0;
+	while (ArchEvoGenUtil::split_string(list_string, ",", i) != "")
+	{
+		just_read = ArchEvoGenUtil::split_string(list_string, ",", i);
+		i++;
+		int a = stoi(ArchEvoGenUtil::split_string(just_read, "-", 0));
+		int b = stoi(ArchEvoGenUtil::split_string(just_read, "-", 1));
+		vector<int> element = { a, b };
+		to_return.push_back(element);
+	}
+	return to_return;
+}
+
+vector<int> condensed_list_to_uncondensed_list(vector<vector<int>> uncondensed_list)
+{
+	vector<int> to_return;
+	for (int i = 0; i < uncondensed_list.size(); i++)
+	{
+		extend_and_increment(to_return, uncondensed_list[i][0], uncondensed_list[i][1]);
+	}
+	return to_return;
 }
 
 void Species::create_extinction_cache()
@@ -241,4 +281,101 @@ int Species::get_peak_alive()
 int Species::get_extinction_date()
 {
 	return extinction_date;
+}
+
+string Species::get_save_string()
+{
+	string to_return = "";
+	string general_info = "";
+	general_info += to_string(number_alive)    + ","; //0
+	general_info += to_string(total_alive)     + ","; //1
+	general_info += to_string(peak_alive)      + ","; //2
+	general_info += to_string(extinction_date) + ","; //3
+	general_info += to_string(id)              + ","; //4
+	general_info += to_string(parent_id)       + ","; //5
+	general_info += readable_id                + ","; //6
+	general_info += to_string(arrival_date);          //7
+
+	to_return += general_info + ";";
+
+	string genome_string = "";
+	for (int i = 0; i < NUMBER_OF_GENES; i++)
+	{
+		genome_string.append(to_string(genome[i]));
+		genome_string.append(",");
+	}
+
+	to_return += genome_string + ";";
+
+	to_return += list_to_string(all_prey()) + ";";
+	to_return += list_to_string(all_predators()) + ";";
+	to_return += list_to_string(all_ages()) + ";";
+	to_return += list_to_string(all_virilities()) + ";";
+	string children_string = "";
+	for (int i = 0; i < all_children().size(); i++)
+	{
+		children_string += all_children()[i] + ",";
+	}
+	to_return += children_string + ";";
+	return to_return;
+}
+
+void Species::load_from_string(string read_string, bool is_extinct)
+{
+	string general_info      = ArchEvoGenUtil::split_string(read_string, ";", 0);
+	string genome_string     = ArchEvoGenUtil::split_string(read_string, ";", 1);
+	string prey_string       = ArchEvoGenUtil::split_string(read_string, ";", 2);
+	string predators_string  = ArchEvoGenUtil::split_string(read_string, ";", 3);
+	string ages_string       = ArchEvoGenUtil::split_string(read_string, ";", 4);
+	string virilities_string = ArchEvoGenUtil::split_string(read_string, ";", 5);
+	string children_string   = ArchEvoGenUtil::split_string(read_string, ";", 6);
+
+	number_alive    = stoi(ArchEvoGenUtil::split_string(general_info, ",", 0));
+	total_alive     = stoi(ArchEvoGenUtil::split_string(general_info, ",", 1));
+	peak_alive      = stoi(ArchEvoGenUtil::split_string(general_info, ",", 2));
+	extinction_date = stoi(ArchEvoGenUtil::split_string(general_info, ",", 3));
+	id              = stoi(ArchEvoGenUtil::split_string(general_info, ",", 4));
+	parent_id       = stoi(ArchEvoGenUtil::split_string(general_info, ",", 5));
+	readable_id     =      ArchEvoGenUtil::split_string(general_info, ",", 6) ;
+	arrival_date    = stoi(ArchEvoGenUtil::split_string(general_info, ",", 7));
+
+	
+	for (int i = 0; i < NUMBER_OF_GENES; i++)
+	{
+		genome[i] = stoi(ArchEvoGenUtil::split_string(genome_string, ",", i));
+	}
+
+	vector<vector<int>> read_prey       = string_to_list(prey_string);
+	vector<vector<int>> read_predators  = string_to_list(predators_string);
+	vector<vector<int>> read_ages       = string_to_list(ages_string);
+	vector<vector<int>> read_virilities = string_to_list(virilities_string);
+
+	vector<int> read_children;
+	
+	string just_read;
+	int i = 0;
+	while (ArchEvoGenUtil::split_string(children_string, ",", i) != "")
+	{
+		just_read = ArchEvoGenUtil::split_string(children_string, ",", i);
+		i++;
+		int a = stoi(just_read);
+		read_children.push_back(a);
+	}
+	extinct = is_extinct;
+	if (!is_extinct)
+	{
+		prey       = condensed_list_to_uncondensed_list(read_prey);
+		predators  = condensed_list_to_uncondensed_list(read_predators);
+		ages       = condensed_list_to_uncondensed_list(read_ages);
+		virilities = condensed_list_to_uncondensed_list(read_virilities);
+		children = read_children;
+	}
+	else
+	{
+		extinct_prey = read_prey;
+		extinct_predators = read_predators;
+		extinct_ages = read_ages;
+		extinct_virilities = read_virilities;
+		extinct_children = read_children;
+	}
 }

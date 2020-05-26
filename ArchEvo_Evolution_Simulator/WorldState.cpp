@@ -2,6 +2,10 @@
 #include "ISA.h"
 #include "ArchEvoGenUtil.h"
 #include <stdlib.h>
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 void WorldState::new_tilde()
 {
@@ -22,7 +26,12 @@ WorldState::WorldState(int _size, int _pruning_rate, int _influx_rate)
 	pruning_rate = _pruning_rate;
 	influx_rate = _influx_rate;
 	iteration = 0;
-	world = new CellState **[size];
+	create_world();
+}
+
+void WorldState::create_world()
+{
+	world = new CellState * *[size];
 	for (int x = 0; x < size; x++)
 	{
 		world[x] = new CellState * [size];
@@ -119,4 +128,86 @@ int WorldState::get_size()
 int WorldState::get_iteration()
 {
 	return iteration;
+}
+
+void WorldState::save_state(string file_name)
+{
+	cout << "Saving..." << endl;
+	if (!filesystem::exists(WORLD_DIR))
+	{
+		//Create world directory
+		filesystem::create_directory(WORLD_DIR);
+		cout << "Created world directory" << endl;
+	}
+
+	if (!filesystem::exists(WORLD_DIR + file_name))
+	{
+		filesystem::create_directory(WORLD_DIR + file_name);
+		cout << "Created new world" << endl;
+	}
+
+	ofstream world_file;
+	world_file.open(WORLD_DIR + file_name + "/world.txt");
+	string general_info = "";
+	general_info += to_string(size) + ",";
+	general_info += to_string(iteration) + ",";
+	general_info += to_string(pruning_rate) + ",";
+	general_info += to_string(influx_rate) + ",";
+	general_info += to_string(CellState::next_id) + ",";
+	general_info += to_string(species_tracker.next_species_id);
+	world_file << general_info << "\n";
+	for (int x = 0; x < size; x++)
+	{
+		for (int y = 0; y < size; y++)
+		{
+			if (world[x][y] != nullptr)
+			{
+				string cell_string = "";
+				cell_string += to_string(x) + ",";
+				cell_string += to_string(y) + "|";
+				cell_string += world[x][y]->get_save_string();
+				//cout << world[x][y]->get_save_string() << endl;
+				world[x][y]->load_from_string(world[x][y]->get_save_string());
+				//cout << world[x][y]->get_save_string() << endl;
+				world_file << cell_string << "\n";
+			}
+		}
+	}
+	world_file.close();
+
+	species_tracker.save_state(WORLD_DIR + file_name + "/species");
+}
+
+void WorldState::load_state(string file_name)
+{
+	cout << "Loading" << endl;
+	ifstream world_file;
+	bool reading_general_info = true;
+	world_file.open(WORLD_DIR + file_name + "/world.txt");
+	string read_string;
+	while (world_file >> read_string)
+	{
+		if (reading_general_info)
+		{
+			reading_general_info = false;
+			size         = stoi(ArchEvoGenUtil::split_string(read_string, ",", 0));
+			iteration    = stoi(ArchEvoGenUtil::split_string(read_string, ",", 1));
+			pruning_rate = stoi(ArchEvoGenUtil::split_string(read_string, ",", 2));
+			influx_rate  = stoi(ArchEvoGenUtil::split_string(read_string, ",", 3));
+			CellState::next_id = stoi(ArchEvoGenUtil::split_string(read_string, ",", 4));
+			species_tracker.next_species_id = stoi(ArchEvoGenUtil::split_string(read_string, ",", 5));
+			create_world();
+		}
+		else
+		{
+			string coords = ArchEvoGenUtil::split_string(read_string, "|", 0);
+			string cell_data = ArchEvoGenUtil::split_string(read_string, "|", 1);
+			int x = stoi(ArchEvoGenUtil::split_string(coords, ",", 0));
+			int y = stoi(ArchEvoGenUtil::split_string(coords, ",", 1));
+			CellState* new_cell = new CellState;
+			new_cell->load_from_string(cell_data);
+			world[x][y] = new_cell;
+		}
+	}
+	species_tracker.load_state(WORLD_DIR + file_name + "/species");
 }

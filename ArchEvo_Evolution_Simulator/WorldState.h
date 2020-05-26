@@ -1,6 +1,8 @@
 #pragma once
 #include "CellState.h"
 #include "SpeciesTracker.h"
+#define WORLD_DIR "C:/ArchEvo/"
+
 class WorldState
 {
 private:
@@ -9,10 +11,10 @@ private:
 	int pruning_rate;
 	
 	void new_tilde();
-	
 
 public:
 	WorldState(int _size, int _pruning_rate, int _influx_rate);
+	void create_world();
 	~WorldState();
 	CellState*** world;
 
@@ -27,4 +29,7 @@ public:
 
 	int influx_rate;
 	SpeciesTracker species_tracker;
+
+	void save_state(string file_name);
+	void load_state(string file_name);
 };

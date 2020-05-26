@@ -24,6 +24,8 @@ int main()
 	}
 	world->place_cell(10, 10, test_cell);
 	*/
+	world->load_state("test_1");
+	Viewer::speed = SPEED_PAUSED;
 	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;
 	int count = 0;
@@ -37,6 +39,14 @@ int main()
 		}
 		Viewer::draw(world);
 		//cout << "Iteration: " << world->get_iteration() << " S: " << world->species_tracker.number_of_living_species() << " E: " << world->species_tracker.number_of_extinct_species() << endl;
+		
+		//if (world->get_iteration() == 10000 && !has_saved)
+		//{
+		//	has_saved = true;
+		//	Viewer::speed = SPEED_PAUSED;
+		//	world->save_state("test_1");
+		//}
+		
 	}
 	delete world;	
 }

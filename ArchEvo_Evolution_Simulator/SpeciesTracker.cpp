@@ -1,6 +1,7 @@
 #include "SpeciesTracker.h"
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 using namespace std;
 const char letters[26] = { 'a', 'b', 'c', 'd','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 
@@ -312,4 +313,50 @@ void SpeciesTracker::ensure_sorted()
 {
 	sort_extinct_species_list();
 	sort_species_list();
+}
+
+void SpeciesTracker::save_species_vector(string filename, vector<Species*> input)
+{
+	ofstream species_file;
+	species_file.open(filename);
+	for (int i = 0; i < input.size(); i++)
+	{
+		Species* test_species = new Species();
+		test_species->load_from_string(input[i]->get_save_string(), true);
+		species_file << input[i]->get_save_string() << "\n";
+	}
+	species_file.close();
+}
+
+void SpeciesTracker::load_species_vector(string filename, bool extinct)
+{
+	ifstream species_file;
+	species_file.open(filename);
+	string read_string;
+	while (species_file >> read_string)
+	{
+		Species* new_species = new Species();
+		new_species->load_from_string(read_string, extinct);
+		if (extinct)
+		{
+			extinct_species_list.push_back(new_species);
+		}
+		else
+		{
+			species_list.push_back(new_species);
+		}
+	}
+	species_file.close();
+}
+
+void SpeciesTracker::save_state(string filename)
+{
+	save_species_vector(filename + "_alive.txt", species_list);
+	save_species_vector(filename + "_extinct.txt", extinct_species_list);
+}
+
+void SpeciesTracker::load_state(string filename)
+{
+	load_species_vector(filename + "_alive.txt", false);
+	load_species_vector(filename + "_extinct.txt", true);
 }

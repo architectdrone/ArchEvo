@@ -59,4 +59,7 @@ public:
 	string readable_id;
 	int genome[NUMBER_OF_GENES];
 	int arrival_date;
+
+	string get_save_string();
+	void load_from_string(string read_string, bool extinct);
 };

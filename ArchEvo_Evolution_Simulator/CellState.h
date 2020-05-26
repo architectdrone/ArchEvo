@@ -1,12 +1,14 @@
 #pragma once
+#include <string>
 #define NUMBER_OF_GENES 32
 #define MUTATION_RATE 0.001 //Chance of a single bit in a single cell flipping.
 #define NVO_LOGO 0
 #define INITIAL_ENERGY 64
+using namespace std;
 class CellState
 {
 private:
-	static int next_id;
+	
 public:
 	void make_child(CellState parent);
 	void make_random();
@@ -18,7 +20,7 @@ public:
 	//Physical Registers
 	int energy = 0;
 	int logo   = 0;
-	int guess = 0;
+	int guess  = 0;
 	int reg_a  = 0;
 	int reg_b  = 0;
 	int reg_c  = 0;
@@ -33,4 +35,9 @@ public:
 
 	int id = 0;
 	int last_iteration = -1;
+
+	string get_save_string();
+	void load_from_string(string to_load);
+
+	static int next_id;
 };
