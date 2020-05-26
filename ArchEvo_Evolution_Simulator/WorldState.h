@@ -30,6 +30,11 @@ public:
 	int influx_rate;
 	SpeciesTracker species_tracker;
 
+	bool auto_save;
+	int auto_save_rate;
+	string auto_save_file_name;
+
+
 	void save_state(string file_name);
 	void load_state(string file_name);
 };

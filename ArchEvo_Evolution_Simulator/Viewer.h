@@ -90,4 +90,9 @@ public:
 	static int draw_mode;
 	static bool highlights;
 	static int speed;
+
+	//These are command line operations invoked with a keypress.
+	static void save(WorldState* world);
+	static void load(WorldState* world);
+	static void auto_save(WorldState* world);
 };

@@ -454,7 +454,7 @@ void Viewer::draw(WorldState* world)
 		case 'r':
 			speed = SPEED_REAL_TIME;
 			break;
-		case 's':
+		case 't':
 			speed = SPEED_SLOW;
 			break;
 		case 'p':
@@ -467,9 +467,19 @@ void Viewer::draw(WorldState* world)
 			draw_mode = (draw_mode + 1) % 3;
 			break;
 		case 'h':
-			
 			highlights = !highlights;
 			break;
+		case 's':
+			save(world);
+			break;
+		case 'l':
+			load(world);
+			break;
+		case 'a':
+			auto_save(world);
+			break;
+
+
 	}
 	
 	world_window->clear();
@@ -495,4 +505,47 @@ void Viewer::draw(WorldState* world)
 
 		TCODConsole::flush();
 	}
+}
+
+void Viewer::save(WorldState* world)
+{
+	string filename;
+	cout << "Save to: ";
+	cin >> filename;
+	cout << endl;
+	world->save_state(filename);
+}
+
+void Viewer::load(WorldState* world)
+{
+	string choice;
+	cout << "Save first? (y/n): ";
+	cin >> choice;
+	if (choice == "y")
+	{
+		save(world);
+	}
+	cout << endl;
+	string filename;
+	cout << "Load from: ";
+	cin >> filename;
+	cout << endl;
+	world->load_state(filename);
+}
+
+void Viewer::auto_save(WorldState* world)
+{
+	string filename;
+	cout << "Save to: ";
+	cin >> filename;
+	cout << endl;
+	
+	string how_often;
+	cout << "How Often: ";
+	cin >> how_often;
+	cout << endl;
+
+	world->auto_save = true;
+	world->auto_save_rate = stoi(how_often);
+	world->auto_save_file_name = filename;
 }

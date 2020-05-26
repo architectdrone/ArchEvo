@@ -69,7 +69,10 @@ void WorldState::update()
 	{
 		species_tracker.prune_extinct_species();
 	}
-
+	if (auto_save && iteration % auto_save_rate == 0)
+	{
+		save_state(auto_save_file_name);
+	}
 
 	for (int x = 0; x < size; x++)
 	{
