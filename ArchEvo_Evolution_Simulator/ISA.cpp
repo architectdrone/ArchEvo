@@ -218,6 +218,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 				if (!testing_template)
 				{
 					current_template_start = current_ip;
+					current_template_score = 0;
 					current_template_length = 0;
 					testing_template = true;
 					//cout << "Testing template at " << current_template_start << endl;
@@ -234,6 +235,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 					{
 						best_template_score = current_template_score;
 						best_template_start = current_template_start;
+						best_template_length = current_template_length;
 					}
 					if (best_template_score == initial_template_length)
 					{
@@ -242,7 +244,7 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 				}
 				//cout << "Current Template Length " << current_template_length << endl;
 				//cout << get_instruction_name(current_cell->genes[initial_template_position-1]) << "?=" << get_instruction_name(current_cell->genes[current_ip]) << endl;
-				if (current_cell->genes[initial_template_position + current_template_length - 1] == current_cell->genes[current_ip])
+				if (current_cell->genes[initial_template_position] == current_cell->genes[current_ip])
 				{
 					current_template_score++;
 				}
@@ -276,10 +278,11 @@ int ISA::find(int x, int y, WorldState* world, int initial_ip)
 		current_ip++;
 		current_ip = current_ip % NUMBER_OF_GENES;
 	}
+
 	if (best_template_start == -1)
 	{
 		//cout << "No other templates found" << endl;
-		return initial_ip;
+		return initial_ip+initial_template_length;
 	}
 	return ArchEvoGenUtil::true_mod(best_template_start+best_template_length, NUMBER_OF_GENES);
 }
@@ -347,7 +350,7 @@ void ISA::execute(int x, int y, WorldState* world)
 		}
 		else if (op == JMP_COP)
 		{
-			current->ip = find(x, y, world, current->ip);
+			current->ip = find(x, y, world, ArchEvoGenUtil::true_mod(current->ip, NUMBER_OF_GENES));
 			ip_op = true;
 			//cout << "Jumping forward to " << current->ip << endl;
 		}
@@ -355,7 +358,7 @@ void ISA::execute(int x, int y, WorldState* world)
 		{
 			if (R2_value == 0xFF)
 			{
-				current->ip = find(x, y, world, current->ip);
+				current->ip = find(x, y, world, ArchEvoGenUtil::true_mod(current->ip, NUMBER_OF_GENES));
 				ip_op = true;
 			}
 		}
