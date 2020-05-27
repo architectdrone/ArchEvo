@@ -95,4 +95,5 @@ public:
 	static void save(WorldState* world);
 	static void load(WorldState* world);
 	static void auto_save(WorldState* world);
+	static void generate_gene_bank();
 };

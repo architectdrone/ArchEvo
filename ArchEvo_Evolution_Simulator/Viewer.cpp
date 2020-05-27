@@ -3,6 +3,7 @@
 #include <iostream>
 #include <bitset>
 #include "ArchEvoGenUtil.h"
+#include "GenebankGenerator.h"
 int Viewer::draw_mode = DRAW_LINEAGE;
 bool Viewer::fast_forward = false;
 int Viewer::world_offset_x = 0;
@@ -478,7 +479,9 @@ void Viewer::draw(WorldState* world)
 		case 'a':
 			auto_save(world);
 			break;
-
+		case 'g':
+			generate_gene_bank();
+			break;
 
 	}
 	
@@ -548,4 +551,15 @@ void Viewer::auto_save(WorldState* world)
 	world->auto_save = true;
 	world->auto_save_rate = stoi(how_often);
 	world->auto_save_file_name = filename;
+}
+
+
+void Viewer::generate_gene_bank()
+{
+	string filename;
+	cout << "What Genebank: ";
+	cin >> filename;
+	cout << "Begin Generation" << endl;
+	GenebankGenerator::generate_all(filename);
+	cout << "Generation Ended" << endl;
 }

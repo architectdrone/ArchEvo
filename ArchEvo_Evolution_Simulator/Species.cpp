@@ -312,9 +312,10 @@ string Species::get_save_string()
 	to_return += list_to_string(all_ages()) + ";";
 	to_return += list_to_string(all_virilities()) + ";";
 	string children_string = "";
-	for (int i = 0; i < all_children().size(); i++)
+	vector<int> the_children = all_children();
+	for (int i = 0; i < the_children.size(); i++)
 	{
-		children_string += to_string(all_children()[i]) + ",";
+		children_string += to_string(the_children[i]) + ",";
 	}
 	to_return += children_string + ";";
 	return to_return;

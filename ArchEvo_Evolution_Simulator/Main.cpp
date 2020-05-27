@@ -2,6 +2,7 @@
 #include "ISA.h"
 #include "Viewer.h"
 #include "libtcod.hpp"
+#include "GenebankGenerator.h"
 #include <iostream>
 
 using namespace std;
@@ -24,6 +25,7 @@ int main()
 	}
 	world->place_cell(10, 10, test_cell);
 	*/
+	
 	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;
 	int count = 0;
