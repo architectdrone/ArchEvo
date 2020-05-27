@@ -9,6 +9,7 @@ using namespace std;
 
 int main()
 {
+	cout << "\"in principio creavit Deus caelum et terram\"" << endl;
 	int size = 20;
 	WorldState* world = new WorldState(size, 10000, 1, 0.001f);
 	/*
