@@ -152,6 +152,7 @@ void Viewer::update_world(WorldState* world)
 
 void Viewer::update_status(WorldState* world)
 {
+	status_bar->clear();
 	//Status Bar
 	status_bar->printf(0, 0, "ArchEvo");
 	status_bar->printf(0, 1, "Iteration %d", world->get_iteration());
@@ -482,6 +483,15 @@ void Viewer::draw(WorldState* world)
 		case 'g':
 			generate_gene_bank();
 			break;
+		case 'c':
+			restart_world(world);
+			break;
+		case ',':
+			world->update();
+			break;
+		case 'n':
+			spawn_species(world);
+			break;
 
 	}
 	
@@ -562,4 +572,47 @@ void Viewer::generate_gene_bank()
 	cout << "Begin Generation" << endl;
 	GenebankGenerator::generate_all(filename);
 	cout << "Generation Ended" << endl;
+}
+
+void Viewer::restart_world(WorldState* world)
+{
+	world->clear();
+	cout << "Mutation Rate: ";
+	string mutation_rate;
+	cin >> mutation_rate;
+	world->mutation_rate = stof(mutation_rate);
+
+	cout << "Influx Rate: ";
+	string influx;
+	cin >> influx;
+	world->influx_rate = stoi(influx);
+}
+
+void Viewer::spawn_species(WorldState* world)
+{
+	cout << "Species ID: ";
+	string sid;
+	cin >> sid;
+	Species* the_species = world->species_tracker.get_species(stoi(sid));
+
+	string choice;
+	bool infinite_energy = false;
+	cout << "Infinite Energy? (y/n): ";
+	cin >> choice;
+	if (choice == "y")
+	{
+		infinite_energy = true;
+	}
+
+	CellState* new_cell = new CellState();
+	for (int gene = 0; gene < NUMBER_OF_GENES; gene++)
+	{
+		new_cell->genes[gene] = the_species->genome[gene];
+	}
+	new_cell->species_id = the_species->id;
+	new_cell->infinite_energy = infinite_energy;
+	new_cell->energy = INITIAL_ENERGY;
+	world->delete_cell(0, 0);
+	world->place_cell(0, 0, new_cell);
+	speed = SPEED_PAUSED;
 }

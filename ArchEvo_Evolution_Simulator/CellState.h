@@ -39,4 +39,5 @@ public:
 	void load_from_string(string to_load);
 
 	static int next_id;
+	bool infinite_energy = false;
 };

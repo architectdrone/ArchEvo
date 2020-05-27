@@ -132,6 +132,7 @@ void CellState::make_child(CellState parent, float mutation_rate)
 	//cout << "TOTAL MUTATIONS: " << mutations << endl;
 	//cout << "MUTATION RATE: " << (float)mutations / (float)(NUMBER_OF_GENES * 11) << endl;
 	//logo = parent.logo;
+	infinite_energy = parent.infinite_energy;
 	lineage_length = parent.lineage_length + 1;
 	id = next_id++;
 }

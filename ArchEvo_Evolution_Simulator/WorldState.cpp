@@ -15,7 +15,18 @@ void WorldState::new_tilde()
 	if (get_cell(random_x, random_y) == nullptr)
 	{
 		CellState* the_cell = new CellState();
-		the_cell->make_random();
+		if (tilde_mode == TILDE_MODE_RANDOM)
+		{
+			the_cell->make_random();
+		}
+		else
+		{
+			for (int i = 0; i < NUMBER_OF_GENES; i++)
+			{
+				the_cell->genes[i] = NPA_COP;
+			}
+			the_cell->energy = INITIAL_ENERGY;
+		}
 		place_cell(random_x, random_y, the_cell);
 	}
 }
@@ -214,4 +225,20 @@ void WorldState::load_state(string file_name)
 		}
 	}
 	species_tracker.load_state(WORLD_DIR + file_name + "/species");
+}
+
+void WorldState::clear()
+{
+	iteration = 0;
+	for (int x = 0; x < size; x++)
+	{
+		for (int y = 0; y < size; y++)
+		{
+			if (world[x][y] != nullptr)
+			{
+				delete world[x][y];
+				world[x][y] = nullptr;
+			}
+		}
+	}
 }

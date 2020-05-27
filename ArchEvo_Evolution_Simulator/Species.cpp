@@ -105,7 +105,8 @@ void Species::register_birth()
 {
 	if (extinct)
 	{
-		throw "Extinct species was born?";
+		//throw "Extinct species was born?";
+		return;
 	}
 	number_alive++;
 	total_alive++;
@@ -119,7 +120,8 @@ void Species::register_eating(int prey_species, int damage)
 {
 	if (extinct)
 	{
-		throw "Extinct species ate?";
+		//throw "Extinct species ate?";
+		return;
 	}
 	prey = extend_and_increment(prey, prey_species, damage);
 }
@@ -128,7 +130,8 @@ void Species::register_being_eaten(int predator_species, int damage)
 {
 	if (extinct)
 	{
-		throw "Extinct species was eaten?";
+		//throw "Extinct species was eaten?";
+		return;
 	}
 	predators = extend_and_increment(predators, predator_species, damage);
 }
@@ -137,7 +140,8 @@ void Species::register_dying(CellState* dying_cell, int date)
 {
 	if (extinct)
 	{
-		throw "Extinct species died?";
+		//throw "Extinct species died?";
+		return;
 	}
 	virilities = extend_and_increment(virilities, dying_cell->virility);
 	ages = extend_and_increment(ages, dying_cell->age);

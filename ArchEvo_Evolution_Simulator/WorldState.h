@@ -3,6 +3,9 @@
 #include "SpeciesTracker.h"
 #define WORLD_DIR "C:/ArchEvo/"
 
+#define TILDE_MODE_RANDOM 0
+#define TILDE_MODE_INERT 1
+
 class WorldState
 {
 private:
@@ -37,4 +40,7 @@ public:
 
 	void save_state(string file_name);
 	void load_state(string file_name);
+
+	void clear();
+	int tilde_mode = 0;
 };

@@ -96,4 +96,6 @@ public:
 	static void load(WorldState* world);
 	static void auto_save(WorldState* world);
 	static void generate_gene_bank();
+	static void restart_world(WorldState* world);
+	static void spawn_species(WorldState* world);
 };

@@ -123,7 +123,12 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Wor
 		//damage = 0;
 	}
 	
-	attacker->energy += damage;
+
+	if (!attacker->infinite_energy)
+	{
+		attacker->energy += damage;
+	}
+	
 	if (damage > 0)
 	{
 		Species* attacker_species = world->species_tracker.get_species(attacker->species_id);
@@ -136,7 +141,11 @@ void ISA::attack(int attacker_x, int attacker_y, int victim_x, int victim_y, Wor
 		{
 			victim_species->register_being_eaten(attacker->species_id, damage);
 		}
-		victim->energy -= damage;
+		if (!victim->infinite_energy)
+		{
+			victim->energy -= damage;
+		}
+		
 	}
 }
 
@@ -144,7 +153,7 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, WorldS
 {
 	CellState* parent = world->get_cell(parent_x, parent_y);
 	CellState* child = world->get_cell(child_x, child_y);
-	if ((parent->energy > INITIAL_ENERGY+1) && (child == nullptr))
+	if ((parent->energy > INITIAL_ENERGY+1 || parent->infinite_energy) && (child == nullptr))
 	{
 		//cout << "Cell has successfully reproduced. ";
 		if (parent->lineage_length == 0)
@@ -155,7 +164,11 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, WorldS
 		{
 			//cout << "CHILD OF CHILD!" << endl;
 		}
-		parent->energy -= INITIAL_ENERGY; //Deduct required energy
+		if (!parent->infinite_energy)
+		{
+			parent->energy -= INITIAL_ENERGY; //Deduct required energy
+		}
+		
 		parent->virility += 1;
 		child = new CellState();
 		child->make_child(*parent, world->mutation_rate);
