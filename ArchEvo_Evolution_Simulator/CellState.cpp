@@ -26,7 +26,7 @@ void CellState::make_random()
 		}
 	}
 	energy = INITIAL_ENERGY;
-	logo = NVO_LOGO;
+	logo = TILDE_LOGO;
 	lineage_length = 0;
 	id = next_id++;
 }
@@ -94,7 +94,7 @@ void CellState::load_from_string(string to_load)
 	
 }
 
-void CellState::make_child(CellState parent)
+void CellState::make_child(CellState parent, float mutation_rate)
 {
 	//cout << "MAKING A BABY" << endl;
 	int mutations = 0;
@@ -108,7 +108,7 @@ void CellState::make_child(CellState parent)
 			int parent_bit = (parent.genes[gene] >> (bit)) & 0b1;
 			//cout << "\t\tBit #" << bit << " : " << parent_bit << "R: " << random_num <<  endl;
 			
-			if (random_num > MUTATION_RATE)
+			if (random_num > mutation_rate)
 			{
 				genes[gene] += parent_bit;
 			}

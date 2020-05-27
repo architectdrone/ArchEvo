@@ -158,7 +158,7 @@ bool ISA::reproduce(int parent_x, int parent_y, int child_x, int child_y, WorldS
 		parent->energy -= INITIAL_ENERGY; //Deduct required energy
 		parent->virility += 1;
 		child = new CellState();
-		child->make_child(*parent);
+		child->make_child(*parent, world->mutation_rate);
 		child->energy = INITIAL_ENERGY;
 		world->place_cell(child_x, child_y, child);
 

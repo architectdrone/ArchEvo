@@ -20,12 +20,13 @@ void WorldState::new_tilde()
 	}
 }
 
-WorldState::WorldState(int _size, int _pruning_rate, int _influx_rate)
+WorldState::WorldState(int _size, int _pruning_rate, int _influx_rate, float _mutation_rate)
 {
 	size = _size;
 	pruning_rate = _pruning_rate;
 	influx_rate = _influx_rate;
 	iteration = 0;
+	mutation_rate = _mutation_rate;
 	create_world();
 }
 

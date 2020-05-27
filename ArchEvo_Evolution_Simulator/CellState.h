@@ -1,8 +1,7 @@
 #pragma once
 #include <string>
 #define NUMBER_OF_GENES 32
-#define MUTATION_RATE 0.001 //Chance of a single bit in a single cell flipping.
-#define NVO_LOGO 0
+#define TILDE_LOGO 0
 #define INITIAL_ENERGY 64
 using namespace std;
 class CellState
@@ -10,7 +9,7 @@ class CellState
 private:
 	
 public:
-	void make_child(CellState parent);
+	void make_child(CellState parent, float mutation_rate);
 	void make_random();
 
 	//Genetic Information

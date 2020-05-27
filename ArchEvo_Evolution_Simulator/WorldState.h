@@ -13,7 +13,7 @@ private:
 	void new_tilde();
 
 public:
-	WorldState(int _size, int _pruning_rate, int _influx_rate);
+	WorldState(int _size, int _pruning_rate, int _influx_rate, float _mutation_rate);
 	void create_world();
 	~WorldState();
 	CellState*** world;
@@ -28,8 +28,9 @@ public:
 	int get_iteration();
 
 	int influx_rate;
-	SpeciesTracker species_tracker;
+	float mutation_rate;
 
+	SpeciesTracker species_tracker;
 	bool auto_save;
 	int auto_save_rate;
 	string auto_save_file_name;

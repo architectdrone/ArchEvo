@@ -10,7 +10,7 @@ using namespace std;
 int main()
 {
 	int size = 20;
-	WorldState* world = new WorldState(size, 10000, 1);
+	WorldState* world = new WorldState(size, 10000, 1, 0.001f);
 	/*
 	CellState* test_cell = new CellState;
 	test_cell->energy = 256;
