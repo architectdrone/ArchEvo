@@ -32,4 +32,6 @@ public:
 	void save_state(string filename);
 	void load_state(string filename);
 	int next_species_id = 0;
+
+	bool store_extinct_species = true;
 };

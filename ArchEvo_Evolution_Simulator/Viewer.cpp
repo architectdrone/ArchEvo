@@ -499,7 +499,7 @@ void Viewer::draw(WorldState* world)
 	mouse_x = mouse.cx;
 	mouse_y = mouse.cy;
 	click = mouse.lbutton_pressed;
-	if (speed != SPEED_FAST_FORWARD || world->get_iteration() % 1000 == 0)
+	if (speed != SPEED_FAST_FORWARD || world->get_iteration() % FAST_REFRESH_RATE == 0)
 	{
 		//Update world display
 		update_world(world);
@@ -586,6 +586,11 @@ void Viewer::restart_world(WorldState* world)
 	string influx;
 	cin >> influx;
 	world->influx_rate = stoi(influx);
+
+	cout << "Save Extinct? (t or f): ";
+	char extinct_char;
+	cin >> extinct_char;
+	world->species_tracker.store_extinct_species = (extinct_char == 't');
 }
 
 void Viewer::spawn_species(WorldState* world)

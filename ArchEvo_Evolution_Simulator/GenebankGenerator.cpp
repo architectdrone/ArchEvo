@@ -141,6 +141,7 @@ void GenebankGenerator::generate_single_entry(Species* species, string path)
 void GenebankGenerator::generate_all(string filename)
 {
 	string extinct_species_path = WORLD_DIR + filename + "/species";
+	cout << "Loading File..." << endl;
 	species_tracker.load_state(extinct_species_path);
 	vector<Species*> all_species = species_tracker.get_all_species();
 	string gene_bank_path = WORLD_DIR + filename + "/genebank";
@@ -149,9 +150,10 @@ void GenebankGenerator::generate_all(string filename)
 		//Create world directory
 		filesystem::create_directory(gene_bank_path);
 	}
-
+	cout << "Creating Entries. Number of species: " << all_species.size() << endl;
 	for (int i = 0; i < all_species.size(); i++)
 	{
+		cout << "\tCreating Entry " << i << ", " << all_species[i]->id << endl;
 		generate_single_entry(all_species[i], gene_bank_path);
 	}
 }

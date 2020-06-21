@@ -4,6 +4,8 @@
 #include "libtcod.hpp"
 #include "ISA.h"
 
+#define FAST_REFRESH_RATE 100000
+
 #define DRAW_LINEAGE 0
 #define DRAW_SPECIES 1
 

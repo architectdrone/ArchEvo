@@ -58,32 +58,36 @@ Species* SpeciesTracker::get_species(int species_id, bool ensure_sorted)
 			return species_list[i];
 		}
 	}
-	//Also search extinct species.
-	if (ensure_sorted)
+
+	if (store_extinct_species)
 	{
-		sort_extinct_species_list();
-	}
-	for (int i = 0; i < extinct_species_list.size(); i++)
-	{
-		if (extinct_species_list[i]->id == species_id)
+		//Also search extinct species.
+		if (ensure_sorted)
 		{
-			return extinct_species_list[i];
+			sort_extinct_species_list();
 		}
-	}
-	//Finally, search for pruned extinct species. Return the parent of the pruned species.
-	for (int i = 0; i < extinct_species_list.size(); i++)
-	{
-		Species* the_species = extinct_species_list[i];
-		vector<int> all_subspecies = the_species->all_children();
-		for (int j = 0; j < all_subspecies.size(); j++)
+		for (int i = 0; i < extinct_species_list.size(); i++)
 		{
-			if (all_subspecies[j] == species_id)
+			if (extinct_species_list[i]->id == species_id)
 			{
-				return the_species;
+				return extinct_species_list[i];
+			}
+		}
+		//Finally, search for pruned extinct species. Return the parent of the pruned species.
+		for (int i = 0; i < extinct_species_list.size(); i++)
+		{
+			Species* the_species = extinct_species_list[i];
+			vector<int> all_subspecies = the_species->all_children();
+			for (int j = 0; j < all_subspecies.size(); j++)
+			{
+				if (all_subspecies[j] == species_id)
+				{
+					return the_species;
+				}
 			}
 		}
 	}
-
+	
 	//Who knows? Probably a flash in the pan species.
 	return nullptr;
 }
@@ -213,11 +217,12 @@ void SpeciesTracker::extinction_if_needed(CellState* dead_cell, int date)
 	{
 		//Extinction
 		species_list.erase(species_list.begin() + species_pos); //Remove it from the species list.
-		if ((the_species->get_total_alive() == 1) || (the_species->parent_id == 0 && the_species->all_children().size() == 0))
+		if ((the_species->get_total_alive() == 1) || (the_species->parent_id == 0 && the_species->all_children().size() == 0) || !store_extinct_species)
 		{
 			//We consider irrelevant all "flash in the pan" species. These species
 			//1. Only ever had one member
 			//2. Were a child of root and had no sub species.
+			//We also use the same logic if no data is stored.
 			delete the_species;
 		}
 		else
