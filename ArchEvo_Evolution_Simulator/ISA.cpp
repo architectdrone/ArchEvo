@@ -319,6 +319,11 @@ void ISA::execute(int x, int y, WorldState* world)
 	current->last_iteration = world->get_iteration();
 	int instruction = current->genes[current->ip];
 
+	if (world->step_cost)
+	{
+		current->energy--;
+	}
+
 	//Kill cell if energy is gone.
 	if (current->energy <= 0)
 	{
@@ -378,7 +383,11 @@ void ISA::execute(int x, int y, WorldState* world)
 		else if (op == MOV_COP)
 		{
 			//Move
-			world->swap_cells(x, y, target_x, target_y);
+			
+			if ((!world->swap_move && world->get_cell(target_x, target_y) == nullptr) || world->swap_move)
+			{
+				world->swap_cells(x, y, target_x, target_y);
+			}
 		}
 		else if (op == IGN_COP)
 		{

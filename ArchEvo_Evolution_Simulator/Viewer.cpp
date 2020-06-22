@@ -591,6 +591,14 @@ void Viewer::restart_world(WorldState* world)
 	char extinct_char;
 	cin >> extinct_char;
 	world->species_tracker.store_extinct_species = (extinct_char == 't');
+
+	cout << "Swap Move? (t or f): ";
+	cin >> extinct_char;
+	world->swap_move = (extinct_char == 't');
+
+	cout << "Step Cost? (t or f): ";
+	cin >> extinct_char;
+	world->step_cost = (extinct_char == 't');
 }
 
 void Viewer::spawn_species(WorldState* world)

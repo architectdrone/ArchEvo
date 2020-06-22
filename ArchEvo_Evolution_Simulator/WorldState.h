@@ -30,9 +30,6 @@ public:
 	int get_size();
 	int get_iteration();
 
-	int influx_rate;
-	float mutation_rate;
-
 	SpeciesTracker species_tracker;
 	bool auto_save;
 	int auto_save_rate;
@@ -43,4 +40,9 @@ public:
 
 	void clear();
 	int tilde_mode = 0;
+
+	int influx_rate; //Number of cells entering the world.
+	float mutation_rate; //Rate of mutation.
+	bool swap_move = false; //Does moving execute a swap, or is moving impossible when a cell occupies the position a cell wants to move into?
+	bool step_cost = true; //Do cells lose 1 energy per instruction executed?
 };
