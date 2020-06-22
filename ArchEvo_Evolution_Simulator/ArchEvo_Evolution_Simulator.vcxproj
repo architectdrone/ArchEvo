@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="ArchEvoGenUtil.h" />
     <ClInclude Include="CellState.h" />
+    <ClInclude Include="FastSpeciesContainer.h" />
     <ClInclude Include="GenebankGenerator.h" />
     <ClInclude Include="SpeciesTracker.h" />
     <ClInclude Include="WorldState.h" />
@@ -158,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="ArchEvoGenUtil.cpp" />
     <ClCompile Include="CellState.cpp" />
+    <ClCompile Include="FastSpeciesContainer.cpp" />
     <ClCompile Include="GenebankGenerator.cpp" />
     <ClCompile Include="ISA.cpp" />
     <ClCompile Include="Main.cpp" />

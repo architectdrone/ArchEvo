@@ -123,7 +123,7 @@ void Species::register_eating(int prey_species, int damage)
 		//throw "Extinct species ate?";
 		return;
 	}
-	prey = extend_and_increment(prey, prey_species, damage);
+	prey.set(prey.get(prey_species)+damage, prey_species);
 }
 
 void Species::register_being_eaten(int predator_species, int damage)
@@ -133,7 +133,7 @@ void Species::register_being_eaten(int predator_species, int damage)
 		//throw "Extinct species was eaten?";
 		return;
 	}
-	predators = extend_and_increment(predators, predator_species, damage);
+	predators.set(predators.get(predator_species) + damage, predator_species);
 }
 
 void Species::register_dying(CellState* dying_cell, int date)
@@ -143,8 +143,8 @@ void Species::register_dying(CellState* dying_cell, int date)
 		//throw "Extinct species died?";
 		return;
 	}
-	virilities = extend_and_increment(virilities, dying_cell->virility);
-	ages = extend_and_increment(ages, dying_cell->age);
+	virilities.set(virilities.get(dying_cell->virility) + 1, dying_cell->virility);
+	ages.set(ages.get(dying_cell->age) + 1, dying_cell->age);
 	number_alive--;
 
 	if (number_alive == 0)
@@ -159,7 +159,7 @@ void Species::register_child_species(int id)
 {
 	if (!extinct)
 	{
-		children = extend_and_increment(children, id);
+		children.set(1, id);
 	}
 	else
 	{
@@ -191,7 +191,7 @@ vector<vector<int>> Species::all_prey()
 {
 	if (!extinct)
 	{
-		return condense_list(prey);
+		return prey.condense();
 	}
 	else
 	{
@@ -203,7 +203,7 @@ vector<vector<int>> Species::all_predators()
 {
 	if (!extinct)
 	{
-		return condense_list(predators);
+		return predators.condense();
 	}
 	else
 	{
@@ -215,7 +215,7 @@ vector<vector<int>> Species::all_ages()
 {
 	if (!extinct)
 	{
-		return condense_list(ages);
+		return ages.condense();
 	}
 	else
 	{
@@ -227,7 +227,7 @@ vector<vector<int>> Species::all_virilities()
 {
 	if (!extinct)
 	{
-		return condense_list(virilities);
+		return virilities.condense();
 	}
 	else
 	{
@@ -251,9 +251,9 @@ vector<int> Species::all_children()
 	if (!extinct)
 	{
 		vector<int> to_return;
-		for (int i = 0; i < children.size(); i++)
+		for (int i = children.get_lowest()-1; i < children.get_set_size()+1; i++)
 		{
-			if (children[i] != 0)
+			if (children.get(i) != 0)
 			{
 				to_return.push_back(i);
 			}
@@ -369,11 +369,14 @@ void Species::load_from_string(string read_string, bool is_extinct)
 	extinct = is_extinct;
 	if (!is_extinct)
 	{
-		prey       = condensed_list_to_uncondensed_list(read_prey);
-		predators  = condensed_list_to_uncondensed_list(read_predators);
-		ages       = condensed_list_to_uncondensed_list(read_ages);
-		virilities = condensed_list_to_uncondensed_list(read_virilities);
-		children = read_children;
+		prey.uncondense(read_prey);
+		predators.uncondense(read_predators);
+		ages.uncondense(read_ages);
+		virilities.uncondense(read_virilities);
+		for (int i = 0; i < read_children.size(); i++)
+		{
+			children.set(1, read_children[i]);
+		}
 	}
 	else
 	{

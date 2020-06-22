@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "CellState.h"
+#include "FastSpeciesContainer.h"
 
 #define TOLERABLE_DIFFERENCE_AMOUNT 0.1 //If a genome differs by greater than this percent from the species genome, they are different species.
 
@@ -10,13 +11,13 @@ class Species
 {	
 private:
 	//For predators and prey, each index is an ID. For example, if prey[4] = 5, that means organism with ID 4 was eaten 5 times.
-	vector<int> prey;
-	vector<int> predators;
+	FastSpeciesContainer prey;
+	FastSpeciesContainer predators;
 
 	//For children, ages, and virilities
-	vector<int> children;
-	vector<int> ages;
-	vector<int> virilities;
+	FastSpeciesContainer children;
+	FastSpeciesContainer ages;
+	FastSpeciesContainer virilities;
 	
 	//Extinction caches - this reduces the size of the species in memory as soon as it goes extinct.
 	void create_extinction_cache();

@@ -3,6 +3,7 @@
 #include "Viewer.h"
 #include "libtcod.hpp"
 #include "GenebankGenerator.h"
+#include "FastSpeciesContainer.h"
 #include <iostream>
 
 using namespace std;
@@ -27,6 +28,16 @@ int main()
 	world->place_cell(10, 10, test_cell);
 	*/
 	
+	FastSpeciesContainer myContainer;
+	for (int i = 10; i > 5; i--)
+	{
+		myContainer.set(i, i);
+	}
+	for (int i = -5; i < 15; i++)
+	{
+		cout << i << " " << myContainer.get(i) << endl;
+	}
+
 	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;
 	int count = 0;
