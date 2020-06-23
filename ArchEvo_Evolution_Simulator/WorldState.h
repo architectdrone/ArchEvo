@@ -1,6 +1,7 @@
 #pragma once
 #include "CellState.h"
 #include "SpeciesTracker.h"
+#include <chrono>
 #define WORLD_DIR "C:/ArchEvo/"
 
 #define TILDE_MODE_RANDOM 0
@@ -12,7 +13,7 @@ private:
 	int size;
 	int iteration;
 	int pruning_rate;
-	
+	chrono::steady_clock::time_point begin;
 	void new_tilde();
 
 public:

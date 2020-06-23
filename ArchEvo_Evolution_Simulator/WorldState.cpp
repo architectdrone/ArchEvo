@@ -33,6 +33,8 @@ void WorldState::new_tilde()
 
 WorldState::WorldState(int _size, int _pruning_rate, int _influx_rate, float _mutation_rate)
 {
+
+	begin = chrono::steady_clock::now();
 	size = _size;
 	pruning_rate = _pruning_rate;
 	influx_rate = _influx_rate;
@@ -84,6 +86,14 @@ void WorldState::update()
 	if (auto_save && iteration % auto_save_rate == 0)
 	{
 		save_state(auto_save_file_name);
+	}
+	if (iteration % 100000 == 0)
+	{
+		auto stop = chrono::steady_clock::now();
+		int minutes = chrono::duration_cast<chrono::minutes>(stop - begin).count();
+		int seconds = chrono::duration_cast<chrono::seconds> (stop - begin).count() - minutes * 60;
+		cout << iteration << " : " << minutes << "m " << seconds << "s" << endl;
+		begin = stop;
 	}
 
 	for (int x = 0; x < size; x++)
