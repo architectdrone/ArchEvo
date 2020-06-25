@@ -5,46 +5,6 @@
 #include "ArchEvoGenUtil.h"
 using namespace std;
 
-vector<int> extend_and_increment(vector<int> input, int index, int amount = 1)
-{
-	if (index >= input.size())
-	{
-		input.resize(index+1);
-		input[index] = 0;
-	}
-	input[index] += amount;
-	return input;
-}
-
-vector<vector<int>> condense_list(vector<int> list)
-{
-	vector<vector<int>> condensed_list;
-	for (int i = 0; i < list.size(); i++)
-	{
-		if (list[i] != 0)
-		{
-			vector<int> new_entry;
-			new_entry.resize(2);
-			new_entry[0] = i;
-			new_entry[1] = list[i];
-			condensed_list.push_back(new_entry);
-		}
-	}
-	return condensed_list;
-}
-
-float list_average(vector<vector<int>> condensed)
-{
-	int total = 0;
-	int sum = 0;
-	for (int i = 0; i < condensed.size(); i++)
-	{
-		total += condensed[i][1];
-		sum += condensed[i][1] * condensed[i][0];
-	}
-	return (float)sum / (float)total;
-}
-
 string list_to_string(vector<vector<int>> list)
 {
 	string to_return = "";
@@ -70,16 +30,6 @@ vector<vector<int>> string_to_list(string list_string)
 		int b = stoi(ArchEvoGenUtil::split_string(just_read, "-", 1));
 		vector<int> element = { a, b };
 		to_return.push_back(element);
-	}
-	return to_return;
-}
-
-vector<int> condensed_list_to_uncondensed_list(vector<vector<int>> uncondensed_list)
-{
-	vector<int> to_return;
-	for (int i = 0; i < uncondensed_list.size(); i++)
-	{
-		to_return = extend_and_increment(to_return, uncondensed_list[i][0], uncondensed_list[i][1]);
 	}
 	return to_return;
 }
@@ -238,12 +188,12 @@ vector<vector<int>> Species::all_virilities()
 
 float Species::average_age()
 {
-	return list_average(all_ages());
+	return ages.average();
 }
 
 float Species::average_virility()
 {
-	return list_average(all_virilities());
+	return virilities.average();
 }
 
 vector<int> Species::all_children()

@@ -29,16 +29,6 @@ int main()
 	world->place_cell(10, 10, test_cell);
 	*/
 
-	unordered_map<int, int> my_map;
-	my_map[0] = 30;
-	my_map[5] = 50;
-
-	for (std::pair<int, int> element : my_map)
-	{
-		std::cout << element.first << " :: " << element.second << std::endl;
-	}
-	cout << my_map[1] << endl;
-
 	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;
 	int count = 0;
