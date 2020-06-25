@@ -14,15 +14,18 @@ int main()
 	cout << "\"in principio creavit Deus caelum et terram\"" << endl;
 	int size = 20;
 	WorldState* world = new WorldState(size, 10000, 1, 0.001f);
+	
 	/*
 	CellState* test_cell = new CellState;
 	test_cell->energy = 256;
-	test_cell->iploc = 255;
-	test_cell->genes[0] = ISA::create_instruction(INC_ROP, A_REG);
-	test_cell->genes[1] = ISA::create_instruction(JMP_COP, IPLOC_REG, true);
-	test_cell->genes[2] = ISA::create_instruction(NPB_COP);
-	test_cell->genes[3] = ISA::create_instruction(NPB_COP);
-	for (int i = 4; i < NUMBER_OF_GENES; i++)
+	test_cell->iploc = 0;
+	test_cell->genes[0] = ISA::create_instruction(SET_ROP, C_REG, D_REG);
+	test_cell->genes[1] = ISA::create_instruction(NPB_COP);
+	test_cell->genes[2] = ISA::create_instruction(INC_ROP, B_REG);
+	test_cell->genes[3] = ISA::create_instruction(JPC_COP, C_REG, true);
+	test_cell->genes[4] = ISA::create_instruction(NPB_COP);
+	test_cell->genes[5] = ISA::create_instruction(INC_ROP, C_REG);
+	for (int i = 6; i < NUMBER_OF_GENES; i++)
 	{
 		test_cell->genes[i] = ISA::create_instruction(IGN_COP);
 	}

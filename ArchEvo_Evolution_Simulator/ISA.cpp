@@ -475,7 +475,7 @@ void ISA::execute(int x, int y, WorldState* world)
 
 void ISA::set_reg(int x, int y, int reg, int new_value, WorldState* world)
 {
-	int true_value = ArchEvoGenUtil::true_mod(new_value, 0b11111111);
+	int true_value = ArchEvoGenUtil::true_mod(new_value, (0b11111111)+1);
 	CellState* current = world->get_cell(x, y);
 	if (reg == 0)
 	{
