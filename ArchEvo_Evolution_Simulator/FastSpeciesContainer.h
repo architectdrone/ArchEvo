@@ -1,12 +1,12 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
+#include <map>
 using namespace std;
 class FastSpeciesContainer
 {
 	private:
-		vector<int> container;
-		int lowest = -1;
-
+		unordered_map<int, int> container;
 	public:
 		int get(int i);
 		void set(int num, int i);
@@ -14,10 +14,9 @@ class FastSpeciesContainer
 		void clear();
 
 		vector<vector<int>> condense();
+		vector<int> simple_condense();
 		void uncondense(vector<vector<int>> input);
 
-		int get_lowest();
-		int get_set_size();
 		float average();
 };
 

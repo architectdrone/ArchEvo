@@ -3,18 +3,31 @@
 vector<vector<int>> FastSpeciesContainer::condense()
 {
 	vector<vector<int>> condensed_list;
-	for (int i = 0; i < container.size(); i++)
+	for (pair<int, int> element : container)
 	{
-		if (container[i] != 0)
+		if (element.second != 0)
 		{
 			vector<int> new_entry;
 			new_entry.resize(2);
-			new_entry[0] = i+lowest;
-			new_entry[1] = container[i];
+			new_entry[0] = element.first;
+			new_entry[1] = element.second;
 			condensed_list.push_back(new_entry);
 		}
 	}
 	return condensed_list;
+}
+
+vector<int> FastSpeciesContainer::simple_condense()
+{
+	vector<vector<int>> condensed_list = condense();
+	vector<int> simple_condensed_list;
+
+	for (int i = 0; i < condensed_list.size(); i++)
+	{
+		simple_condensed_list.push_back(condensed_list[i][0]);
+	}
+
+	return simple_condensed_list;
 }
 
 void FastSpeciesContainer::uncondense(vector<vector<int>> condensed)
@@ -25,70 +38,26 @@ void FastSpeciesContainer::uncondense(vector<vector<int>> condensed)
 	}
 }
 
-int FastSpeciesContainer::get_lowest()
-{
-	return lowest;
-}
-
-int FastSpeciesContainer::get_set_size()
-{
-	return lowest + container.size();
-}
-
 float FastSpeciesContainer::average()
 {
 	int sum = 0;
-	for (int i = 0; i < container.size(); i++)
+	int total = 0;
+	for (pair<int, int> element : container)
 	{
-		sum += container[i];
+		total += element.first;
+		sum   += element.first * element.second;
 	}
-	return (float)sum / (float)get_set_size();
+	return (float)sum / (float)total;
 }
 
 int FastSpeciesContainer::get(int i)
 {
-	int true_position = i - lowest;
-	if (true_position < 0)
-	{
-		return 0;
-	}
-	else if (true_position >= container.size())
-	{
-		return 0;
-	}
-	else
-	{
-		return container[true_position];
-	}
+	return container[i];
 }
 
 void FastSpeciesContainer::set(int num, int i)
 {
-	if (lowest == -1)
-	{
-		container.push_back(num);
-		lowest = i;
-	}
-	else if (i >= lowest)
-	{
-		int true_position = i - lowest;
-		if (true_position >= container.size())
-		{
-			container.resize(true_position + 1);
-			container[true_position] = 0;
-		}
-		container[true_position] = num;
-	}
-	else
-	{
-		int lowest_difference = lowest - i;
-		for (int i = 0; i < lowest_difference; i++)
-		{
-			container.insert(container.begin(), 0);
-		}
-		container[0] = num;
-		lowest = i;
-	}
+	container[i] = num;
 }
 
 void FastSpeciesContainer::clear()

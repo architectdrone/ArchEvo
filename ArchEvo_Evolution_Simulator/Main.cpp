@@ -4,6 +4,7 @@
 #include "libtcod.hpp"
 #include "GenebankGenerator.h"
 #include "FastSpeciesContainer.h"
+#include <unordered_map>
 #include <iostream>
 
 using namespace std;
@@ -27,16 +28,16 @@ int main()
 	}
 	world->place_cell(10, 10, test_cell);
 	*/
-	
-	FastSpeciesContainer myContainer;
-	for (int i = 10; i > 5; i--)
+
+	unordered_map<int, int> my_map;
+	my_map[0] = 30;
+	my_map[5] = 50;
+
+	for (std::pair<int, int> element : my_map)
 	{
-		myContainer.set(i, i);
+		std::cout << element.first << " :: " << element.second << std::endl;
 	}
-	for (int i = -5; i < 15; i++)
-	{
-		cout << i << " " << myContainer.get(i) << endl;
-	}
+	cout << my_map[1] << endl;
 
 	Viewer::init();
 	Viewer::draw_mode = DRAW_SPECIES;

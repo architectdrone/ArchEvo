@@ -250,15 +250,7 @@ vector<int> Species::all_children()
 {
 	if (!extinct)
 	{
-		vector<int> to_return;
-		for (int i = children.get_lowest()-1; i < children.get_set_size()+1; i++)
-		{
-			if (children.get(i) != 0)
-			{
-				to_return.push_back(i);
-			}
-		}
-		return to_return;
+		return children.simple_condense();
 	}
 	else
 	{
