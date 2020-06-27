@@ -599,6 +599,10 @@ void Viewer::restart_world(WorldState* world)
 	cout << "Step Cost? (t or f): ";
 	cin >> extinct_char;
 	world->step_cost = (extinct_char == 't');
+
+	cout << "Blind? (t or f): ";
+	cin >> extinct_char;
+	world->blind = (extinct_char == 't');
 }
 
 void Viewer::spawn_species(WorldState* world)

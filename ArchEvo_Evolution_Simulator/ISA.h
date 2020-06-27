@@ -73,7 +73,7 @@ class ISA
         static vector<int> is_reproducing(int x, int y, WorldState* world);
         static vector<int> is_attacking(int x, int y, WorldState* world);
 
-        static int get_reg(int x, int y, int reg, WorldState* world);
+        static int get_reg(int x, int y, int reg, WorldState* world, bool blind = false, bool iploc = false);
         static int iploc_x(int x, int y, int iploc);
         static int iploc_y(int x, int y, int iploc);
 };

@@ -46,4 +46,5 @@ public:
 	float mutation_rate; //Rate of mutation.
 	bool swap_move = true; //Does moving execute a swap, or is moving impossible when a cell occupies the position a cell wants to move into?
 	bool step_cost = false; //Do cells lose 1 energy per instruction executed?
+	bool blind = false; //Are cells prevented from seeing the contents of neighboring cells logo?
 };

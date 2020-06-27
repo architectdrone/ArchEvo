@@ -349,8 +349,8 @@ void ISA::execute(int x, int y, WorldState* world)
 	int op = get_OP(instruction);
 
 	//Values of the registers
-	int R1_value = get_reg(x, y, R1, world);
-	int R2_value = get_reg(x, y, R2, world);
+	int R1_value = get_reg(x, y, R1, world, world->blind);
+	int R2_value = get_reg(x, y, R2, world, world->blind);
 
 	//IPLOC values
 	int target_x = iploc_x(x, y, current->iploc);
@@ -419,13 +419,13 @@ void ISA::execute(int x, int y, WorldState* world)
 		}
 		else if (op == SLL_ROP)
 		{
-			//new_R1 = R1_value << 1;
-			new_R1 = R1 * 2;
+			new_R1 = R1_value << 1;
+			//new_R1 = R1 * 2;
 		}
 		else if (op == SRL_ROP)
 		{
-			//new_R1 = R1_value >> 1;
-			new_R1 = (int)(R1 / 2);
+			new_R1 = R1_value >> 1;
+			//new_R1 = (int)(R1 / 2);
 		}
 		else if (op == MOV_ROP)
 		{
@@ -519,8 +519,10 @@ void ISA::set_reg(int x, int y, int reg, int new_value, WorldState* world)
 	}
 }
 
-int ISA::get_reg(int x, int y, int reg, WorldState* world)
+int ISA::get_reg(int x, int y, int reg, WorldState* world, bool blind, bool iploc)
 {
+	//Setting blind to true makes it so that the value of logo appears to be 0 at all times. This prevents the silver bullet genome.
+	//Set iploc to be true when the returned value is in an iploc. No real reason for you to do this.
 	CellState* current = world->get_cell(x, y);
 	if (current == nullptr)
 	{
@@ -532,7 +534,14 @@ int ISA::get_reg(int x, int y, int reg, WorldState* world)
 	}
 	else if (reg == LOGO_REG)
 	{
-		return current->logo;
+		if (!blind || !iploc)
+		{
+			return current->logo;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 	else if (reg == GUESS_REG)
 	{
@@ -566,7 +575,7 @@ int ISA::get_reg(int x, int y, int reg, WorldState* world)
 		{
 			return 0;
 		}
-		return get_reg(new_x, new_y, reg - 8, world);
+		return get_reg(new_x, new_y, reg - 8, world, blind, true);
 	}
 	else
 	{
