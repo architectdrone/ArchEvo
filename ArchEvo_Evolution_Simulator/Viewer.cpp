@@ -440,7 +440,7 @@ void Viewer::draw_species_icon(TCODConsole* console, int x, int y, Species* spec
 
 void Viewer::init()
 {
-	TCODConsole::initRoot(MAIN_WINDOW_W, MAIN_WINDOW_H, "ArchEvo Viewer", false);
+	TCODConsole::initRoot(MAIN_WINDOW_W, MAIN_WINDOW_H, "ArchEvo Viewer", false, TCOD_RENDERER_GLSL);
 	draw_mode = DRAW_LINEAGE;
 }
 
