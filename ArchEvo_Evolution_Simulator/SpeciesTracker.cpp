@@ -320,6 +320,12 @@ void SpeciesTracker::ensure_sorted()
 	sort_species_list();
 }
 
+void SpeciesTracker::clear()
+{
+	species_list.clear();
+	extinct_species_list.clear();
+}
+
 void SpeciesTracker::save_species_vector(string filename, vector<Species*> input)
 {
 	ofstream species_file;

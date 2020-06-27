@@ -251,4 +251,5 @@ void WorldState::clear()
 			}
 		}
 	}
+	species_tracker.clear();
 }

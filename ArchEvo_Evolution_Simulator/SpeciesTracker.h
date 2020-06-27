@@ -25,8 +25,9 @@ public:
 	void print_all_species();
 	void ensure_sorted();
 
+	void clear();
+	
 	void save_species_vector(string filename, vector<Species*> input);
-
 	void load_species_vector(string filename, bool extinct);
 
 	void save_state(string filename);
